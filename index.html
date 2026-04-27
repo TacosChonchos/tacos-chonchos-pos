@@ -1,1781 +1,318 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🌮 Tacos Chonchos - Pedidos</title>
     <style>
-        :root {
-            --rojo: #C62828;
-            --verde: #2E7D32;
-            --amarillo: #F9A825;
-            --oscuro: #1a1a2e;
-            --gris: #f0f0f0;
-            --blanco: #fff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #e8e8e8;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 0;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            min-height: 100vh;
-            background: #f5f5f5;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #1a1a2e 60%, #C62828 100%);
-            color: var(--amarillo);
-            padding: 18px 15px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        header h2 {
-            margin: 0;
-            font-size: 1.4em;
-            letter-spacing: 1px;
-        }
-
-        header small {
-            color: #fff;
-            font-size: 0.75em;
-            display: block;
-            margin-top: 3px;
-        }
-
-        .pantalla {
-            display: none;
-            padding: 15px;
-        }
-
-        .pantalla.activa {
-            display: block;
-        }
-
-        .card {
-            background: var(--blanco);
-            border-radius: 18px;
-            padding: 20px 18px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #eee;
-        }
-
-        .card h3 {
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 1.1em;
-            text-align: center;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            color: #555;
-            margin-top: 10px;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            padding: 13px 15px;
-            margin: 5px 0 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: inherit;
-            background: #fafafa;
-            transition: all 0.3s;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--amarillo);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(249, 168, 37, 0.1);
-        }
-
-        button {
-            background: var(--verde);
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 8px 0;
-            transition: all 0.2s;
-            width: 100%;
-            letter-spacing: 0.5px;
-        }
-
-        button:active {
-            transform: scale(0.96);
-        }
-
-        button:disabled {
-            background: #bdbdbd;
-            cursor: not-allowed;
-        }
-
-        .btn-rojo {
-            background: #C62828;
-        }
-
-        .btn-amarillo {
-            background: var(--amarillo);
-            color: #000;
-            font-weight: 700;
-        }
-
-        .btn-outline {
-            background: white;
-            color: #C62828;
-            border: 2px solid #C62828;
-            padding: 13px 20px;
-        }
-
-        .btn-sm {
-            width: auto;
-            padding: 10px 18px;
-            font-size: 14px;
-            border-radius: 25px;
-            display: inline-block;
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .modal-overlay.activo {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.3s ease;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #1a1a2e, #C62828);
-            color: white;
-            padding: 20px;
-            border-radius: 20px 20px 0 0;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.2em;
-            color: #F9A825;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-footer {
-            padding: 20px;
-            display: flex;
-            gap: 10px;
-            position: sticky;
-            bottom: 0;
-            background: white;
-            border-radius: 0 0 20px 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .modal-footer button {
-            flex: 1;
-            padding: 14px;
-            font-size: 15px;
-        }
-
-        .variante-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            margin: 10px 0;
-            background: #f9f9f9;
-            border-radius: 14px;
-            border: 2px solid #eee;
-        }
-
-        .variante-info {
-            flex: 1;
-        }
-
-        .variante-nombre {
-            font-weight: 700;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .variante-extra {
-            font-size: 13px;
-            color: #888;
-            margin-top: 3px;
-        }
-
-        .variante-extra.gratis {
-            color: #2E7D32;
-            font-weight: 600;
-        }
-
-        .cantidad-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: white;
-            padding: 5px;
-            border-radius: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-cantidad {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            background: white;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            min-width: auto;
-        }
-
-        .btn-cantidad.menos {
-            color: #C62828;
-        }
-
-        .btn-cantidad.mas {
-            color: #2E7D32;
-        }
-
-        .cantidad-numero {
-            font-size: 20px;
-            font-weight: 700;
-            min-width: 30px;
-            text-align: center;
-        }
-
-        .modal-resumen {
-            background: #e8f5e9;
-            padding: 14px;
-            border-radius: 12px;
-            margin-top: 15px;
-            text-align: center;
-            font-weight: 600;
-            display: none;
-        }
-
-        .modal-resumen.visible {
-            display: block;
-        }
-
-        .spinner-container {
-            text-align: center;
-            padding: 40px;
-            display: none;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #C62828;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .categoria-container {
-            background: white;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            position: sticky;
-            top: 108px;
-            z-index: 99;
-        }
-
-        .categoria-fila {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin-bottom: 6px;
-        }
-
-        .cat-tab {
-            padding: 10px 14px;
-            border-radius: 25px;
-            background: #f5f5f5;
-            border: 2px solid #e0e0e0;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            text-align: center;
-            flex: 1;
-            min-width: 70px;
-            max-width: 130px;
-        }
-
-        .cat-tab.activo {
-            background: #C62828;
-            color: white;
-            border-color: #C62828;
-            box-shadow: 0 3px 10px rgba(198, 40, 40, 0.3);
-        }
-
-        .producto-item {
-            background: white;
-            padding: 16px;
-            margin: 10px 0;
-            border-radius: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        .prod-info {
-            flex: 1;
-        }
-
-        .prod-nombre {
-            font-weight: 700;
-            font-size: 15px;
-        }
-
-        .prod-desc {
-            font-size: 11px;
-            color: #888;
-        }
-
-        .prod-precios {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 5px;
-        }
-
-        .prod-precio {
-            color: var(--verde);
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .prod-regular {
-            text-decoration: line-through;
-            color: #bbb;
-            font-size: 13px;
-        }
-
-        .prod-promo-badge {
-            background: #ffeb3b;
-            color: #b71c1c;
-            font-size: 10px;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: 700;
-        }
-
-        .prod-variantes-badge {
-            background: #e3f2fd;
-            color: #1565c0;
-            font-size: 10px;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        .btn-agregar {
-            background: #2E7D32;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            width: auto;
-            min-width: 90px;
-        }
-
-        .btn-agregar.agregado {
-            background: #4CAF50;
-        }
-
-        .btn-agregar.tiene-variantes {
-            background: #1565c0;
-        }
-
-        .ticket {
-            background: #fffef5;
-            border: 2px dashed #F9A825;
-            border-radius: 16px;
-            padding: 20px 16px;
-            margin: 15px 0;
-            font-family: monospace;
-        }
-
-        .ticket h3 {
-            text-align: center;
-            color: #1a1a2e;
-            font-family: 'Segoe UI', sans-serif;
-            margin-bottom: 12px;
-        }
-
-        .ticket-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dotted #e0d8b0;
-            font-size: 13px;
-        }
-
-        .ticket-item-remove {
-            color: #C62828;
-            cursor: pointer;
-            font-weight: bold;
-            padding: 4px 8px;
-        }
-
-        .ticket-resumen {
-            background: #e8f5e9;
-            padding: 12px;
-            border-radius: 10px;
-            margin: 12px 0;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .ticket-total {
-            font-weight: 800;
-            font-size: 20px;
-            text-align: center;
-            padding-top: 15px;
-            border-top: 2px solid #F9A825;
-        }
-
-        .ticket-acciones {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .ticket-acciones button {
-            flex: 1;
-            min-width: 100px;
-            font-size: 13px;
-            padding: 12px;
-        }
-
-        .ticket-cashback {
-            background: #fff8e1;
-            border: 1px solid #F9A825;
-            padding: 12px;
-            border-radius: 10px;
-            margin: 12px 0;
-            font-size: 13px;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .ticket-cashback h4 {
-            color: #F57F17;
-            margin-bottom: 8px;
-            text-align: center;
-        }
-
-        .ticket-cashback-na {
-            color: #999;
-            text-align: center;
-            font-style: italic;
-        }
-
-        .carrito-flotante {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: #2E7D32;
-            color: white;
-            width: 62px;
-            height: 62px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            z-index: 200;
-            border: 3px solid white;
-        }
-
-        .carrito-contador {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #C62828;
-            border-radius: 50%;
-            width: 26px;
-            height: 26px;
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid white;
-        }
-
-        .alert {
-            padding: 14px;
-            border-radius: 12px;
-            margin: 12px 0;
-            text-align: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .alert-info {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .pasos-indicador {
-            display: none;
-            justify-content: center;
-            gap: 8px;
-            margin: 12px 0;
-        }
-
-        .paso {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .paso.completado {
-            background: #2E7D32;
-            color: white;
-        }
-
-        .paso.activo-paso {
-            background: #F9A825;
-            color: #000;
-        }
-
-        .confirmacion-detalle {
-            background: #fafafa;
-            padding: 16px;
-            border-radius: 12px;
-            margin: 12px 0;
-        }
-
-        .confirmacion-total {
-            font-size: 24px;
-            text-align: center;
-            color: #2E7D32;
-            font-weight: 800;
-            margin: 15px 0;
-            padding: 20px;
-            background: #e8f5e9;
-            border-radius: 16px;
-        }
+        :root { --rojo: #C62828; --verde: #2E7D32; --amarillo: #F9A825; --oscuro: #1a1a2e; --gris: #f0f0f0; --blanco: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #e8e8e8; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 0; }
+        .app-container { width: 100%; max-width: 480px; min-height: 100vh; background: #f5f5f5; box-shadow: 0 0 30px rgba(0,0,0,0.15); position: relative; overflow-x: hidden; }
+        header { background: linear-gradient(135deg, #1a1a2e 0%, #1a1a2e 60%, #C62828 100%); color: var(--amarillo); padding: 18px 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 3px 15px rgba(0,0,0,0.3); }
+        header h2 { margin: 0; font-size: 1.4em; letter-spacing: 1px; }
+        header small { color: #fff; font-size: 0.75em; display: block; margin-top: 3px; }
+        .pantalla { display: none; padding: 15px; }
+        .pantalla.activa { display: block; }
+        .card { background: var(--blanco); border-radius: 18px; padding: 20px 18px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .card h3 { margin-bottom: 15px; color: #333; font-size: 1.1em; text-align: center; }
+        label { display: block; font-weight: 600; color: #555; margin-top: 10px; margin-bottom: 5px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 13px 15px; margin: 5px 0 10px 0; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; font-family: inherit; background: #fafafa; transition: all 0.3s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--amarillo); background: #fff; box-shadow: 0 0 0 3px rgba(249, 168, 37, 0.1); }
+        button { background: var(--verde); color: white; border: none; padding: 15px 20px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; margin: 8px 0; transition: all 0.2s; width: 100%; letter-spacing: 0.5px; }
+        button:active { transform: scale(0.96); }
+        button:disabled { background: #bdbdbd; cursor: not-allowed; }
+        .btn-rojo { background: #C62828; }
+        .btn-amarillo { background: var(--amarillo); color: #000; font-weight: 700; }
+        .btn-outline { background: white; color: #C62828; border: 2px solid #C62828; padding: 13px 20px; }
+        .btn-sm { width: auto; padding: 10px 18px; font-size: 14px; border-radius: 25px; display: inline-block; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+        .modal-overlay.activo { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-content { background: white; border-radius: 20px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: slideUp 0.3s ease; }
+        .modal-header { background: linear-gradient(135deg, #1a1a2e, #C62828); color: white; padding: 20px; border-radius: 20px 20px 0 0; text-align: center; position: sticky; top: 0; z-index: 1; }
+        .modal-header h3 { margin: 0; font-size: 1.2em; color: #F9A825; }
+        .modal-body { padding: 20px; }
+        .modal-footer { padding: 20px; display: flex; gap: 10px; position: sticky; bottom: 0; background: white; border-radius: 0 0 20px 20px; border-top: 1px solid #eee; }
+        .modal-footer button { flex: 1; padding: 14px; font-size: 15px; }
+        .variante-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; margin: 10px 0; background: #f9f9f9; border-radius: 14px; border: 2px solid #eee; }
+        .variante-info { flex: 1; }
+        .variante-nombre { font-weight: 700; font-size: 16px; color: #333; }
+        .variante-extra { font-size: 13px; color: #888; margin-top: 3px; }
+        .cantidad-control { display: flex; align-items: center; gap: 10px; background: white; padding: 5px; border-radius: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn-cantidad { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ddd; background: white; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; min-width: auto; }
+        .btn-cantidad.menos { color: #C62828; }
+        .btn-cantidad.mas { color: #2E7D32; }
+        .cantidad-numero { font-size: 20px; font-weight: 700; min-width: 30px; text-align: center; }
+        .modal-resumen { background: #e8f5e9; padding: 14px; border-radius: 12px; margin-top: 15px; text-align: center; font-weight: 600; display: none; }
+        .modal-resumen.visible { display: block; }
+        .spinner-container { text-align: center; padding: 40px; display: none; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #C62828; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .categoria-container { background: white; border-radius: 16px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 108px; z-index: 99; }
+        .categoria-fila { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 6px; }
+        .cat-tab { padding: 10px 14px; border-radius: 25px; background: #f5f5f5; border: 2px solid #e0e0e0; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; text-align: center; flex: 1; min-width: 70px; max-width: 130px; }
+        .cat-tab.activo { background: #C62828; color: white; border-color: #C62828; box-shadow: 0 3px 10px rgba(198,40,40,0.3); }
+        .producto-item { background: white; padding: 16px; margin: 10px 0; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .prod-info { flex: 1; }
+        .prod-nombre { font-weight: 700; font-size: 15px; }
+        .prod-desc { font-size: 11px; color: #888; }
+        .prod-precios { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .prod-precio { color: var(--verde); font-weight: 700; font-size: 18px; }
+        .prod-regular { text-decoration: line-through; color: #bbb; font-size: 13px; }
+        .prod-promo-badge { background: #ffeb3b; color: #b71c1c; font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+        .prod-variantes-badge { background: #e3f2fd; color: #1565c0; font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+        .btn-agregar { background: #2E7D32; color: white; border: none; padding: 10px 16px; border-radius: 25px; font-weight: 700; font-size: 13px; cursor: pointer; width: auto; min-width: 90px; }
+        .btn-agregar.agregado { background: #4CAF50; }
+        .btn-agregar.tiene-variantes { background: #1565c0; }
+        .ticket { background: #fffef5; border: 2px dashed #F9A825; border-radius: 16px; padding: 20px 16px; margin: 15px 0; font-family: monospace; }
+        .ticket h3 { text-align: center; color: #1a1a2e; font-family: 'Segoe UI', sans-serif; margin-bottom:12px; }
+        .ticket-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dotted #e0d8b0; font-size: 13px; }
+        .ticket-item-remove { color: #C62828; cursor: pointer; font-weight: bold; padding: 4px 8px; }
+        .ticket-resumen { background: #e8f5e9; padding: 12px; border-radius: 10px; margin: 12px 0; text-align: center; font-size: 13px; }
+        .ticket-total { font-weight: 800; font-size: 20px; text-align: center; padding-top: 15px; border-top: 2px solid #F9A825; }
+        .ticket-acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+        .ticket-acciones button { flex: 1; min-width: 100px; font-size: 13px; padding: 12px; }
+        .ticket-cashback { background: #fff8e1; border: 1px solid #F9A825; padding: 12px; border-radius: 10px; margin: 12px 0; font-size: 13px; font-family: 'Segoe UI', sans-serif; }
+        .ticket-cashback h4 { color: #F57F17; margin-bottom: 8px; text-align: center; }
+        .ticket-cashback-na { color: #999; text-align: center; font-style: italic; }
+        .carrito-flotante { position: fixed; bottom: 25px; right: 25px; background: #2E7D32; color: white; width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); cursor: pointer; z-index: 200; border: 3px solid white; }
+        .carrito-contador { position: absolute; top: -8px; right: -8px; background: #C62828; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+        .alert { padding: 14px; border-radius: 12px; margin: 12px 0; text-align: center; font-weight: 600; font-size: 14px; }
+        .alert-success { background: #e8f5e9; color: #2e7d32; }
+        .alert-info { background: #e3f2fd; color: #1565c0; }
+        .pasos-indicador { display: none; justify-content: center; gap: 8px; margin: 12px 0; }
+        .paso { width: 34px; height: 34px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+        .paso.completado { background: #2E7D32; color: white; }
+        .paso.activo-paso { background: #F9A825; color: #000; }
+        .confirmacion-detalle { background: #fafafa; padding: 16px; border-radius: 12px; margin: 12px 0; }
+        .confirmacion-total { font-size: 24px; text-align: center; color: #2E7D32; font-weight: 800; margin: 15px 0; padding: 20px; background: #e8f5e9; border-radius: 16px; }
     </style>
 </head>
-
 <body>
-
-    <!-- ============================================ -->
-    <!-- CONTENEDOR PRINCIPAL -->
-    <!-- ============================================ -->
-    <div class="app-container">
-
-        <header>
-            <h2>🌮 TACOS CHONCHOS</h2>
-            <small>Comidas Caseras 100%</small>
-        </header>
-
-        <div class="pasos-indicador" id="pasosIndicador">
-            <div class="paso" id="paso1">1</div>
-            <div class="paso" id="paso2">2</div>
-            <div class="paso" id="paso3">3</div>
-        </div>
-
-        <!-- MODAL DE VARIANTES -->
-        <div class="modal-overlay" id="modalVariantes">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalTitulo">🌮 Seleccionar Variante</h3>
-                </div>
-                <div class="modal-body" id="modalBody"></div>
-                <div class="modal-resumen" id="modalResumen"></div>
-                <div class="modal-footer">
-                    <button class="btn-outline" onclick="ModuloVariantes.cerrar()">Cancelar</button>
-                    <button onclick="ModuloVariantes.confirmar()" id="btnConfirmarVariantes">✓ Agregar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- PANTALLA 1: CLIENTE -->
-        <div id="pantallaCliente" class="pantalla activa">
-            <div class="card">
-                <h3>📱 Paso 1: Datos del Cliente</h3>
-                <div id="mensajeCliente"></div>
-                <label>📱 WhatsApp (10 dígitos):</label>
-                <input type="tel" id="txtWhatsApp" placeholder="Ej: 8181866825" maxlength="10" oninput="ModuloCliente.validarWhatsApp()" autocomplete="off">
-                <label>👤 Nombre del cliente:</label>
-                <input type="text" id="txtNombre" placeholder="Nombre completo" autocomplete="off">
-                <label>📦 Tipo de servicio:</label>
-                <select id="selServicio" onchange="ModuloCliente.cambiarServicio()">
-                    <option value="">Selecciona una opción...</option>
-                    <option value="domicilio">🏠 A Domicilio</option>
-                    <option value="pickup">📦 Pickup (recoger)</option>
-                    <option value="comedor">🍽️ En Comedor</option>
-                </select>
-                <div id="divDomicilio" style="display:none;">
-                    <label>🗺️ Zona de envío:</label>
-                    <select id="selZona"></select>
-                    <label>📍 Dirección completa:</label>
-                    <textarea id="txtDireccion" rows="3" placeholder="Calle, número, colonia, referencias..."></textarea>
-                </div>
-                <button onclick="ModuloCliente.iniciarPedido()" style="margin-top:15px;">🍽️ VER MENÚ Y ORDENAR →</button>
-            </div>
-            <div class="spinner-container" id="spinnerCarga">
-                <div class="spinner"></div>
-                <div class="loading-text">Cargando datos desde Google Sheets...</div>
-                <div class="error-text" id="errorCarga"></div>
-            </div>
-        </div>
-
-        <!-- PANTALLA 2: MENÚ -->
-        <div id="pantallaMenu" class="pantalla">
-            <div class="categoria-container" id="categoriaContainer"></div>
-            <div id="listaProductos"></div>
-            <div id="carritoResumen" class="ticket" style="display:none;">
-                <h3>🧾 TICKET DE PEDIDO</h3>
-                <div id="ticketItems"></div>
-                <div class="ticket-resumen" id="ticketResumenInfo"></div>
-                <div class="ticket-cashback" id="ticketCashback">
-                    <h4>🎁 CASHBACK</h4>
-                    <div id="cashbackDetalle">
-                        <div class="ticket-cashback-na">Agrega productos para calcular cashback</div>
-                    </div>
-                </div>
-                <div class="ticket-total" id="ticketTotal">$0.00</div>
-                <div class="ticket-acciones">
-                    <button onclick="ModuloPedido.mostrarConfirmacion()" id="btnRevisar">💳 REVISAR PEDIDO →</button>
-                    <button class="btn-rojo btn-sm" onclick="ModuloPedido.vaciarCarrito()">🗑️ VACIAR</button>
-                    <button class="btn-outline btn-sm" onclick="ModuloCliente.regresarCliente()">← DATOS</button>
-                </div>
-            </div>
-            <div class="carrito-flotante" id="btnCarritoFlotante" style="display:none;" onclick="ModuloPedido.irAlCarrito()">🛒<span class="carrito-contador" id="contadorCarrito">0</span></div>
-        </div>
-
-        <!-- PANTALLA 3: CONFIRMACIÓN -->
-        <div id="pantallaConfirmacion" class="pantalla">
-            <div class="card">
-                <h3>✅ Paso 3: Confirmar Pedido</h3>
-                <div class="confirmacion-detalle" id="confirmacionDetalle"></div>
-                <div class="confirmacion-total" id="confirmacionTotal"></div>
-                <button onclick="ModuloEnvio.enviarWhatsApp()" class="btn-amarillo">📲 ENVIAR PEDIDO POR WHATSAPP</button>
-                <button class="btn-outline" onclick="ModuloPedido.volverAlMenu()">← SEGUIR COMPRANDO</button>
-                <button class="btn-rojo" onclick="ModuloEnvio.nuevoPedido()">🔄 NUEVO PEDIDO</button>
-            </div>
-        </div>
-
+<div class="app-container">
+<header><h2>🌮 TACOS CHONCHOS</h2><small>Comidas Caseras 100%</small></header>
+<div class="pasos-indicador" id="pasosIndicador"><div class="paso" id="paso1">1</div><div class="paso" id="paso2">2</div><div class="paso" id="paso3">3</div></div>
+<div class="modal-overlay" id="modalVariantes">
+    <div class="modal-content">
+        <div class="modal-header"><h3 id="modalTitulo">🌮 Seleccionar Variante</h3></div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-resumen" id="modalResumen"></div>
+        <div class="modal-footer"><button class="btn-outline" onclick="ModuloVariantes.cerrar()">Cancelar</button><button onclick="ModuloVariantes.confirmar()" id="btnConfirmarVariantes">✓ Agregar</button></div>
     </div>
+</div>
+<div id="pantallaCliente" class="pantalla activa">
+    <div class="card">
+        <h3>📱 Paso 1: Datos del Cliente</h3>
+        <div id="mensajeCliente"></div>
+        <label>📱 WhatsApp (10 dígitos):</label><input type="tel" id="txtWhatsApp" placeholder="Ej: 8181866825" maxlength="10" oninput="ModuloCliente.validarWhatsApp()">
+        <label>👤 Nombre:</label><input type="text" id="txtNombre" placeholder="Nombre completo">
+        <label>📦 Servicio:</label><select id="selServicio" onchange="ModuloCliente.cambiarServicio()"><option value="">Selecciona...</option><option value="domicilio">🏠 A Domicilio</option><option value="pickup">📦 Pickup</option><option value="comedor">🍽️ Comedor</option></select>
+        <div id="divDomicilio" style="display:none;"><label>🗺️ Zona:</label><select id="selZona"></select><label>📍 Dirección:</label><textarea id="txtDireccion" rows="3"></textarea></div>
+        <button onclick="ModuloCliente.iniciarPedido()">🍽️ VER MENÚ →</button>
+    </div>
+    <div class="spinner-container" id="spinnerCarga"><div class="spinner"></div><div class="loading-text">Cargando...</div></div>
+</div>
+<div id="pantallaMenu" class="pantalla">
+    <div class="categoria-container" id="categoriaContainer"></div>
+    <div id="listaProductos"></div>
+    <div id="carritoResumen" class="ticket" style="display:none;">
+        <h3>🧾 TICKET</h3><div id="ticketItems"></div>
+        <div class="ticket-resumen" id="ticketResumenInfo"></div>
+        <div class="ticket-cashback"><h4>🎁 CASHBACK</h4><div id="cashbackDetalle"></div></div>
+        <div class="ticket-total" id="ticketTotal">$0.00</div>
+        <div class="ticket-acciones"><button onclick="ModuloPedido.mostrarConfirmacion()">💳 REVISAR →</button><button class="btn-rojo btn-sm" onclick="ModuloPedido.vaciarCarrito()">🗑️</button><button class="btn-outline btn-sm" onclick="ModuloCliente.regresarCliente()">←</button></div>
+    </div>
+    <div class="carrito-flotante" id="btnCarritoFlotante" style="display:none;" onclick="ModuloPedido.irAlCarrito()">🛒<span class="carrito-contador" id="contadorCarrito">0</span></div>
+</div>
+<div id="pantallaConfirmacion" class="pantalla">
+    <div class="card"><h3>✅ Confirmar</h3><div class="confirmacion-detalle" id="confirmacionDetalle"></div><div class="confirmacion-total" id="confirmacionTotal"></div>
+        <button onclick="ModuloEnvio.enviarWhatsApp()" class="btn-amarillo">📲 ENVIAR WHATSAPP</button>
+        <button class="btn-outline" onclick="ModuloPedido.volverAlMenu()">← SEGUIR</button>
+        <button class="btn-rojo" onclick="ModuloEnvio.nuevoPedido()">🔄 NUEVO</button>
+    </div>
+</div>
+</div>
+<script src="https://apis.google.com/js/api.js"></script>
+<script>
+// ====== CONFIG ======
+const SHEETS_CONFIG = { apiKey: 'AIzaSyCebxft-XMaDooLfd7YIP9M6H1GJu_najg', spreadsheetId: '1C6k8URI-XQING0jDCnsh6zu9OzHfj-L1EUu69OqNH_o', ranges: { productos: 'Productos!A:G', envios: 'Envios!A:B', datos: 'Datos!A:C', cashback: 'Cashback!A:H', clientes: 'Clientes!A:I' } };
+const CONFIG = { negocio: { nombre: "Tacos Chonchos", direccion: "Adolfo prieto 2210", whatsapp: "528181866825", telefono: "8183405574" }, productos: [], envios: {}, clientesRegistrados: [], reglasCashback: [] };
+const Estado = { cliente: null, carrito: [], tipoServicio: "", costoEnvio: 0, zonaSeleccionada: "", productoActual: null, cantidadesVariantes: {} };
+const DIAS_SEMANA = ['DOMINGO','LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO'];
+const HOY = DIAS_SEMANA[new Date().getDay()];
 
-    <!-- ============================================ -->
-    <!-- SCRIPTS -->
-    <!-- ============================================ -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script>
-        // ########################################################################
-        // ################## CONFIGURACIÓN CENTRAL ###############################
-        // ########################################################################
-        const SHEETS_CONFIG = {
-            apiKey: 'AIzaSyCebxft-XMaDooLfd7YIP9M6H1GJu_najg',
-            spreadsheetId: '1C6k8URI-XQING0jDCnsh6zu9OzHfj-L1EUu69OqNH_o',
-            ranges: {
-                productos: 'Productos!A:G',
-                envios: 'Envios!A:B',
-                datos: 'Datos!A:C',
-                cashback: 'Cashback!A:H',
-                clientes: 'Clientes!A:I'
+// ====== UI ======
+const UI = {
+    mostrarPantalla(id){ document.querySelectorAll('.pantalla').forEach(p=>p.classList.remove('activa')); document.getElementById(id).classList.add('activa'); },
+    actualizarPasos(n){ let ind=document.getElementById('pasosIndicador'); ind.style.display='flex'; for(let i=1;i<=3;i++){ let p=document.getElementById('paso'+i); p.classList.remove('completado','activo-paso'); if(i<n)p.classList.add('completado'); if(i===n)p.classList.add('activo-paso'); } }
+};
+
+// ====== CARGA ======
+const ModuloCarga = {
+    async inicializar(){ 
+        document.getElementById('spinnerCarga').style.display='block';
+        await new Promise(r=>gapi.load('client',async()=>{await gapi.client.init({apiKey:SHEETS_CONFIG.apiKey,discoveryDocs:['https://sheets.googleapis.com/$discovery/rest?version=v4']});r();}));
+        const[p,e,d,cb,cl]=await Promise.all([this.cargar('productos'),this.cargar('envios'),this.cargar('datos'),this.cargar('cashback'),this.cargar('clientes')]);
+        CONFIG.productos=p;CONFIG.envios=e;CONFIG.reglasCashback=cb;CONFIG.clientesRegistrados=cl;
+        if(d.nombreNegocio)CONFIG.negocio.nombre=d.nombreNegocio;
+        if(d.whatsApp1)CONFIG.negocio.whatsapp=d.whatsApp1;
+        document.getElementById('spinnerCarga').style.display='none';
+        ModuloCliente.actualizarZonasEnvio();
+        ModuloClientes.inicializarCache();
+    },
+    async cargar(tipo){
+        const r=await gapi.client.sheets.spreadsheets.values.get({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:SHEETS_CONFIG.ranges[tipo]});
+        const f=r.result.values||[];
+        if(tipo==='productos')return f.slice(1).filter(x=>x&&x[0]).map((x,i)=>({id:i+1,nombre:(x[0]||'').trim(),precioRegular:parseFloat(x[1])||0,precioPromo:x[2]?parseFloat(x[2]):null,categoria:(x[3]||'').trim(),descripcion:(x[5]||'').trim(),variantes:((s)=>{let v={};if(s)s.split(',').forEach(p=>{let[n,e]=p.split(':');if(n)v[n.trim()]=parseFloat((e||'0').replace('+',''))||0});return v})(x[6]||'')}));
+        if(tipo==='envios'){let o={};f.slice(1).forEach(x=>{if(x&&x[0])o[x[0].trim()]=parseFloat(x[1])||0});return o;}
+        if(tipo==='datos'){let o={};f.slice(1).forEach(x=>{if(x&&x[0]&&x[2]&&x[2].trim().toUpperCase()==='SI')o[x[0].trim()]=x[1]||''});return o;}
+        if(tipo==='cashback')return f.slice(1).filter(x=>x&&x[0]).map(x=>({tipo:x[0]||'',valor:parseFloat(x[1])||0,accion:x[2]||'porcentaje',restricciones:x[3]||'',categoria:x[4]||'TODAS',producto:x[5]||'*',seAplica:x[6]||'FALSE',diasAplica:x[7]||'TODOS'}));
+        if(tipo==='clientes')return f.slice(1).filter(x=>x&&x[0]).map(x=>({whatsapp:x[0]||'',nombre:x[1]||'',direccion:x[2]||'',zona:x[3]||'',saldoCashback:parseFloat(x[4])||0,fechaVencimiento:x[5]||'',ultimaCompra:parseFloat(x[6])||0,fechaRegistro:x[7]||'',fechaMovimiento:x[8]||''}));
+        return[];
+    }
+};
+
+// ====== MÓDULO CLIENTE ======
+const ModuloCliente = {
+    actualizarZonasEnvio(){let s=document.getElementById('selZona');let o='<option value="">Selecciona...</option>';for(let[z,c]of Object.entries(CONFIG.envios))o+=`<option value="${z}">${z} - $${c.toFixed(2)}</option>`;s.innerHTML=o;},
+    validarWhatsApp(){let w=document.getElementById('txtWhatsApp').value.replace(/\D/g,'');document.getElementById('txtWhatsApp').value=w;if(w.length===10)this.buscarCliente(w);},
+    buscarCliente(w){
+        let c=ModuloClientes.buscar(w);
+        if(c){document.getElementById('txtNombre').value=c.nombre;document.getElementById('txtDireccion').value=c.direccion;if(c.zona)document.getElementById('selZona').value=c.zona;document.getElementById('mensajeCliente').innerHTML=`<div class="alert alert-success">✅ ${c.nombre} | Cashback: $${c.saldoCashback.toFixed(2)}</div>`;Estado.cliente={...c,esNuevo:false};}
+        else{document.getElementById('mensajeCliente').innerHTML='<div class="alert alert-info">🆕 Cliente nuevo</div>';Estado.cliente={whatsapp:w,esNuevo:true};}
+    },
+    cambiarServicio(){let s=document.getElementById('selServicio').value;Estado.tipoServicio=s;document.getElementById('divDomicilio').style.display=s==='domicilio'?'block':'none';if(s!=='domicilio')Estado.costoEnvio=0;},
+    validarDatosCliente(){let w=document.getElementById('txtWhatsApp').value.replace(/\D/g,''),n=document.getElementById('txtNombre').value.trim(),s=document.getElementById('selServicio').value;if(!w||w.length!==10){alert('WhatsApp inválido');return false}if(!n){alert('Ingresa nombre');return false}if(!s){alert('Selecciona servicio');return false}Estado.cliente={...Estado.cliente,whatsapp:w,nombre:n,servicio:s};if(s==='domicilio'){let d=document.getElementById('txtDireccion').value.trim(),z=document.getElementById('selZona').value;if(!d){alert('Dirección requerida');return false}if(!z){alert('Zona requerida');return false}Estado.zonaSeleccionada=z;Estado.costoEnvio=CONFIG.envios[z]||0;}return true;},
+    iniciarPedido(){if(!this.validarDatosCliente())return;UI.actualizarPasos(2);UI.mostrarPantalla('pantallaMenu');ModuloPedido.inicializar();},
+    regresarCliente(){UI.actualizarPasos(1);UI.mostrarPantalla('pantallaCliente');}
+};
+
+// ====== VARIANTES ======
+const ModuloVariantes = {
+    abrir(p){if(!p||!p.variantes||Object.keys(p.variantes).length===0){ModuloPedido.agregarDirecto(p);return}Estado.productoActual=p;Estado.cantidadesVariantes={};for(let n in p.variantes)Estado.cantidadesVariantes[n]=0;this.renderizarModal();document.getElementById('modalVariantes').classList.add('activo');},
+    cerrar(){document.getElementById('modalVariantes').classList.remove('activo');},
+    renderizarModal(){let p=Estado.productoActual;document.getElementById('modalTitulo').textContent='🌮 '+p.nombre;let h='';for(let[n,e]of Object.entries(p.variantes))h+=`<div class="variante-item"><div class="variante-info"><div class="variante-nombre">${n}</div><div class="variante-extra">${e>0?'+$'+e:'Sin costo'}</div></div><div class="cantidad-control"><button class="btn-cantidad menos" onclick="ModuloVariantes.cambiarCantidad('${n}',-1)">−</button><span class="cantidad-numero" id="cant-${n}">0</span><button class="btn-cantidad mas" onclick="ModuloVariantes.cambiarCantidad('${n}',1)">+</button></div></div>`;document.getElementById('modalBody').innerHTML=h;this.actualizarResumen();},
+    cambiarCantidad(v,d){let n=(Estado.cantidadesVariantes[v]||0)+d;if(n<0)return;Estado.cantidadesVariantes[v]=n;document.getElementById('cant-'+v).textContent=n;this.actualizarResumen();},
+    actualizarResumen(){let t=Object.values(Estado.cantidadesVariantes).reduce((a,b)=>a+b,0);let btn=document.getElementById('btnConfirmarVariantes'),r=document.getElementById('modalResumen');if(t===0){r.classList.remove('visible');btn.disabled=true;return}btn.disabled=false;btn.textContent=`✓ Agregar ${t}`;let pb=(Estado.productoActual.precioPromo||Estado.productoActual.precioRegular);let total=0,items=[];for(let[n,c]of Object.entries(Estado.cantidadesVariantes)){if(c>0){let ex=Estado.productoActual.variantes[n]||0;let st=(pb+ex)*c;total+=st;items.push(`${c}x ${n}=$${st.toFixed(2)}`)}}r.classList.add('visible');r.innerHTML=`<strong>Resumen:</strong><br>${items.join('<br>')}<div>Total: $${total.toFixed(2)}</div>`;},
+    confirmar(){let p=Estado.productoActual,pb=p.precioPromo||p.precioRegular,added=0;for(let[v,c]of Object.entries(Estado.cantidadesVariantes)){if(c>0){let ex=p.variantes[v]||0,pu=pb+ex;let exist=Estado.carrito.find(i=>i.id===p.id&&i.variante===v);if(exist)exist.cantidad+=c;else Estado.carrito.push({id:p.id,nombre:p.nombre,variante:v,precio:pu,cantidad:c,categoria:p.categoria});added+=c}}if(added>0){let btn=document.querySelector(`[data-producto-id="${p.id}"]`);if(btn){let txt=btn.textContent;btn.textContent='✓'+added;btn.classList.add('agregado');setTimeout(()=>{btn.textContent=txt;btn.classList.remove('agregado')},800)}}ModuloPedido.actualizarTicket();this.cerrar();}
+};
+
+// ====== CASHBACK ======
+const ModuloCashback = {
+    obtenerReglas(){return(CONFIG.reglasCashback||[]).filter(r=>{let sa=(r.seAplica||'').toUpperCase().trim();return sa==='TRUE'||sa==='SI'}).map(r=>({tipo:r.tipo,valor:parseFloat(r.valor)||0,accion:(r.accion||'').toLowerCase().includes('pesos')?'pesos':'porcentaje',minCompra:parseFloat((r.restricciones||'').replace(/[^0-9.]/g,''))||0,dias:((s)=>{if(!s||s==='TODOS')return null;let m={LUN:'LUNES',MAR:'MARTES',MIE:'MIERCOLES',JUE:'JUEVES',VIE:'VIERNES',SAB:'SABADO',DOM:'DOMINGO'};let t=s.toUpperCase();for(let[k,v]of Object.entries(m))t=t.replace(new RegExp(k,'g'),v);return t.split(',').map(d=>d.trim());})(r.diasAplica),categorias:((s)=>{if(!s||s==='TODAS')return null;return s.split(',').map(x=>x.trim().toUpperCase());})(r.categoria),productos:((s)=>{if(!s||s==='*')return null;return s.split(',').map(x=>x.trim().toUpperCase());})(r.producto)}));},
+    calcular(sub,carrito){let reglas=this.obtenerReglas();if(!reglas.length)return{total:0,detalle:[],aplica:false};let total=0,detalle=[];for(let r of reglas){if(r.dias&&!r.dias.includes(HOY))continue;if(r.minCompra>0&&sub<r.minCompra)continue;let filtrado=carrito.filter(i=>{if(r.categorias&&!r.categorias.includes(i.categoria.toUpperCase()))return false;if(r.productos&&!r.productos.includes(i.nombre.toUpperCase()))return false;return true});if(!filtrado.length)continue;let sf=filtrado.reduce((s,i)=>s+(i.precio*i.cantidad),0);let m=r.accion==='pesos'?r.valor:sf*(r.valor/100);m=Math.round(m*100)/100;total+=m;detalle.push({tipo:r.tipo,monto:m,accion:r.accion});}return{total:Math.round(total*100)/100,detalle,aplica:total>0};}
+};
+
+// ====== PEDIDOS ======
+const ModuloPedido = {
+    inicializar(){let cats=[...new Set(CONFIG.productos.map(p=>p.categoria))];this.cargarCategorias(cats);if(cats.length)this.mostrarProductos(cats[0]);this.actualizarTicket();},
+    cargarCategorias(cats){let c=document.getElementById('categoriaContainer');let m=Math.ceil(cats.length/2),f1=cats.slice(0,m),f2=cats.slice(m);let h='<div class="categoria-fila">';f1.forEach((cat,i)=>h+=`<span class="cat-tab${i===0?' activo':''}" onclick="ModuloPedido.mostrarProductos('${cat}',this)">${cat}</span>`);h+='</div>';if(f2.length){h+='<div class="categoria-fila">';f2.forEach(cat=>h+=`<span class="cat-tab" onclick="ModuloPedido.mostrarProductos('${cat}',this)">${cat}</span>`);h+='</div>'}c.innerHTML=h;},
+    mostrarProductos(cat,el){if(el){document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('activo'));el.classList.add('activo');}let prods=CONFIG.productos.filter(p=>p.categoria===cat);let c=document.getElementById('listaProductos');c.innerHTML=prods.map(p=>{let promo=p.precioPromo&&p.precioPromo<p.precioRegular;let vars=p.variantes&&Object.keys(p.variantes).length>0;let precio=promo?`<div class="prod-precios"><span class="prod-precio">$${p.precioPromo.toFixed(2)}</span><span class="prod-regular">$${p.precioRegular.toFixed(2)}</span><span class="prod-promo-badge">PROMO</span></div>`:`<div class="prod-precios"><span class="prod-precio">$${p.precioRegular.toFixed(2)}</span></div>`;return`<div class="producto-item"><div class="prod-info"><div class="prod-nombre">${p.nombre}${vars?' <span class="prod-variantes-badge">🔽</span>':''}</div>${precio}</div><button class="btn-agregar${vars?' tiene-variantes':''}" data-producto-id="${p.id}" onclick="ModuloPedido.clicAgregar(${p.id},this)">${vars?'🔽':'+ Agregar'}</button></div>`}).join('');},
+    clicAgregar(id,btn){let p=CONFIG.productos.find(p=>p.id===id);if(!p)return;if(p.variantes&&Object.keys(p.variantes).length>0)ModuloVariantes.abrir(p);else this.agregarDirecto(p,btn);},
+    agregarDirecto(p,btn){let pr=p.precioPromo||p.precioRegular;let ex=Estado.carrito.find(i=>i.id===p.id&&i.variante==='Estándar');if(ex)ex.cantidad++;else Estado.carrito.push({id:p.id,nombre:p.nombre,variante:'Estándar',precio:pr,cantidad:1,categoria:p.categoria});this.actualizarTicket();if(btn){let t=btn.textContent;btn.textContent='✓';btn.classList.add('agregado');setTimeout(()=>{btn.textContent=t;btn.classList.remove('agregado')},700);}},
+    calcSubtotal(){return Estado.carrito.reduce((s,i)=>s+(i.precio*i.cantidad),0);},
+    actualizarTicket(){let items=document.getElementById('ticketItems'),totalEl=document.getElementById('ticketTotal'),resumen=document.getElementById('ticketResumenInfo'),carrito=document.getElementById('carritoResumen'),flotante=document.getElementById('btnCarritoFlotante'),cont=document.getElementById('contadorCarrito');let ti=Estado.carrito.reduce((s,i)=>s+i.cantidad,0);if(!ti){carrito.style.display='none';flotante.style.display='none';return}carrito.style.display='block';flotante.style.display='flex';cont.textContent=ti;let subtotal=0;items.innerHTML=Estado.carrito.map((item,i)=>{let t=item.precio*item.cantidad;subtotal+=t;return`<div class="ticket-item"><span>${item.cantidad}x ${item.nombre} (${item.variante})</span><span>$${t.toFixed(2)}</span><span class="ticket-item-remove" onclick="ModuloPedido.eliminarItem(${i})">✕</span></div>`}).join('');let cash=ModuloCashback.calcular(subtotal,Estado.carrito);resumen.innerHTML=`💰 Subtotal: $${subtotal.toFixed(2)}${Estado.costoEnvio>0?' | 🚚 Envío: $'+Estado.costoEnvio.toFixed(2):''}`;totalEl.innerHTML=`TOTAL: $${(subtotal+Estado.costoEnvio).toFixed(2)}`;this.mostrarCashback(cash);},
+    mostrarCashback(r){let d=document.getElementById('cashbackDetalle');if(!r.aplica||r.total===0){d.innerHTML='<div class="ticket-cashback-na">No aplica cashback</div>';return}let h='';r.detalle.forEach(x=>{h+=`<div style="display:flex;justify-content:space-between;"><span>🎁 ${x.tipo}</span><span>+$${x.monto.toFixed(2)}</span></div>`});h+=`<div style="text-align:center;font-weight:700;margin-top:6px;border-top:1px dashed #F9A825;padding-top:6px;">🏆 Total: $${r.total.toFixed(2)}</div>`;d.innerHTML=h;},
+    eliminarItem(i){Estado.carrito.splice(i,1);this.actualizarTicket();},
+    vaciarCarrito(){if(confirm('¿Vaciar?')){Estado.carrito=[];this.actualizarTicket();}},
+    irAlCarrito(){document.getElementById('carritoResumen').scrollIntoView({behavior:'smooth'});},
+    mostrarConfirmacion(){if(!Estado.carrito.length){alert('Agrega productos');return}UI.actualizarPasos(3);UI.mostrarPantalla('pantallaConfirmacion');ModuloEnvio.mostrarResumen();},
+    volverAlMenu(){UI.actualizarPasos(2);UI.mostrarPantalla('pantallaMenu');}
+};
+
+// ====== ENVÍO ======
+const ModuloEnvio = {
+    mostrarResumen(){let d=document.getElementById('confirmacionDetalle'),t=document.getElementById('confirmacionTotal');let sub=ModuloPedido.calcSubtotal(),cash=ModuloCashback.calcular(sub,Estado.carrito);let h=`<p><b>Cliente:</b> ${Estado.cliente.nombre}</p><p><b>WhatsApp:</b> ${Estado.cliente.whatsapp}</p><p><b>Servicio:</b> ${Estado.tipoServicio}</p>`;if(Estado.tipoServicio==='domicilio')h+=`<p><b>Dir:</b> ${Estado.cliente.direccion}</p><p><b>Zona:</b> ${Estado.zonaSeleccionada} ($${Estado.costoEnvio})</p>`;h+='<hr><b>Productos:</b>';Estado.carrito.forEach(i=>h+=`<p>${i.cantidad}x ${i.nombre} (${i.variante}) = $${(i.precio*i.cantidad).toFixed(2)}</p>`);if(cash.aplica){h+='<hr><b>🎁 Cashback:</b>';cash.detalle.forEach(x=>h+=`<p>${x.tipo}: $${x.monto.toFixed(2)}</p>`);h+=`<p><b>Total: $${cash.total.toFixed(2)}</b></p>`;}d.innerHTML=h;let tf=sub+Estado.costoEnvio;t.innerHTML=`<div>Subtotal: $${sub.toFixed(2)}</div>${Estado.costoEnvio>0?`<div>Envío: $${Estado.costoEnvio.toFixed(2)}</div>`:''}<div style="font-size:30px;">$${tf.toFixed(2)}</div>${cash.total>0?`<div>🎁 Cashback: $${cash.total.toFixed(2)}</div>`:''}`;},
+    enviarWhatsApp(){
+        if(!Estado.carrito.length){alert('Carrito vacío');return;}
+        if(confirm('📲 ¿Enviar pedido por WhatsApp?')){
+            let f=new Date();
+            let m=`🌮 *PEDIDO - TACOS CHONCHOS* 🌮\n\n📅 ${f.toLocaleDateString('es-MX')}\n🕐 ${f.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}\n\n👤 ${Estado.cliente.nombre}\n📱 +52${Estado.cliente.whatsapp}\n📦 ${Estado.tipoServicio}\n`;
+            if(Estado.tipoServicio==='domicilio')m+=`📍 ${Estado.cliente.direccion}\n🗺️ ${Estado.zonaSeleccionada}\n`;
+            m+='\n📋 *PRODUCTOS:*\n';
+            Estado.carrito.forEach(i=>m+=`  • ${i.cantidad}x ${i.nombre} (${i.variante}) = $${(i.precio*i.cantidad).toFixed(2)}\n`);
+            let sub=ModuloPedido.calcSubtotal(),cash=ModuloCashback.calcular(sub,Estado.carrito);
+            m+=`\n💰 Subtotal: $${sub.toFixed(2)}`;if(Estado.costoEnvio>0)m+=`\n🚚 Envío: $${Estado.costoEnvio.toFixed(2)}`;
+            m+=`\n💵 TOTAL: $${(sub+Estado.costoEnvio).toFixed(2)}`;if(cash.total>0)m+=`\n🎁 Cashback: $${cash.total.toFixed(2)}`;
+            m+=`\n\n📍 ${CONFIG.negocio.direccion}\n📞 ${CONFIG.negocio.telefono}`;
+            window.open(`https://wa.me/${CONFIG.negocio.whatsapp}?text=${encodeURIComponent(m)}`,'_blank');
+            
+            // ⭐⭐⭐ REGISTRAR CLIENTE ⭐⭐⭐
+            console.log('🚀 Registrando cliente...');
+            ModuloClientes.procesarCliente(
+                {whatsapp:Estado.cliente.whatsapp,nombre:Estado.cliente.nombre,direccion:Estado.cliente.direccion||'',zona:Estado.zonaSeleccionada||Estado.cliente.zona||''},
+                sub,cash.total
+            );
+        }
+    },
+    nuevoPedido(){Estado.cliente=null;Estado.carrito=[];Estado.tipoServicio='';Estado.costoEnvio=0;['txtWhatsApp','txtNombre','txtDireccion'].forEach(id=>document.getElementById(id).value='');document.getElementById('selServicio').value='';document.getElementById('divDomicilio').style.display='none';document.getElementById('carritoResumen').style.display='none';document.getElementById('btnCarritoFlotante').style.display='none';UI.mostrarPantalla('pantallaCliente');}
+};
+
+// ====== ⭐ MÓDULO 8: REGISTRO DE CLIENTES ⭐ ======
+const ModuloClientes = {
+    _cache:{},
+    _init:false,
+    inicializarCache(){
+        if(this._init)return;
+        this._cache={};
+        if(CONFIG.clientesRegistrados)CONFIG.clientesRegistrados.forEach(c=>{if(c.whatsapp)this._cache[c.whatsapp]=c;});
+        this._init=true;
+        console.log('👤 [CLIENTES] Caché:',Object.keys(this._cache).length,'clientes');
+    },
+    buscar(w){this.inicializarCache();return this._cache[w]||null;},
+    _fmtFecha(f){if(!f||isNaN(f.getTime()))return'';const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return`${String(f.getDate()).padStart(2,'0')}-${m[f.getMonth()]}-${f.getFullYear()}`;},
+    _hoy(){return this._fmtFecha(new Date());},
+    _calcVenc(existente,nuevoSaldo){
+        let hoy=new Date();
+        if(!existente||nuevoSaldo<=0){hoy.setDate(hoy.getDate()+30);return this._fmtFecha(hoy);}
+        if(existente.fechaVencimiento){let p=existente.fechaVencimiento.split('-');if(p.length===3){let meses={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};let d=parseInt(p[0]),me=meses[p[1].toLowerCase()],a=parseInt(p[2]);if(!isNaN(d)&&me!==undefined&&!isNaN(a)){let fv=new Date(a,me,d);fv.setDate(fv.getDate()+4);return this._fmtFecha(fv);}}}
+        hoy.setDate(hoy.getDate()+4);return this._fmtFecha(hoy);
+    },
+    async procesarCliente(datos,monto,cashback){
+        console.log('👤 [CLIENTES] ========== INICIO ==========');
+        console.log('👤 [CLIENTES] Datos:',datos);
+        console.log('👤 [CLIENTES] Monto:',monto,'Cashback:',cashback);
+        if(!datos||!datos.whatsapp){console.log('❌ Sin WhatsApp');return;}
+        this.inicializarCache();
+        let w=datos.whatsapp,existente=this.buscar(w),hoy=this._hoy(),fila;
+        if(existente){
+            console.log('🔄 EXISTENTE - Saldo anterior:',existente.saldoCashback);
+            let ns=(existente.saldoCashback||0)+cashback;
+            fila={whatsapp:w,nombre:datos.nombre||existente.nombre,direccion:datos.direccion||existente.direccion||'',zona:datos.zona||existente.zona||'',saldoCashback:ns,fechaVencimiento:this._calcVenc(existente,ns),ultimaCompra:monto||existente.ultimaCompra||0,fechaRegistro:existente.fechaRegistro||hoy,fechaMovimiento:hoy};
+            this._cache[w]=fila;
+            console.log('✅ Nuevo saldo:',ns,'Vence:',fila.fechaVencimiento);
+        }else{
+            console.log('🆕 NUEVO - Saldo inicial:',cashback);
+            let ns=cashback||0;
+            fila={whatsapp:w,nombre:datos.nombre||'',direccion:datos.direccion||'',zona:datos.zona||'',saldoCashback:ns,fechaVencimiento:this._calcVenc(null,ns),ultimaCompra:monto||0,fechaRegistro:hoy,fechaMovimiento:hoy};
+            this._cache[w]=fila;
+            console.log('✅ Creado - Saldo:',ns,'Vence:',fila.fechaVencimiento);
+        }
+        try{
+            let filaArray=[fila.whatsapp,fila.nombre,fila.direccion,fila.zona,String(fila.saldoCashback),fila.fechaVencimiento,String(fila.ultimaCompra),fila.fechaRegistro,fila.fechaMovimiento];
+            if(existente){
+                let resp=await gapi.client.sheets.spreadsheets.values.get({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I'});
+                let filas=resp.result.values||[],idx=-1;
+                for(let i=1;i<filas.length;i++){if(filas[i]&&filas[i][0]===w){idx=i+1;break;}}
+                if(idx===-1){await gapi.client.sheets.spreadsheets.values.append({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I',valueInputOption:'USER_ENTERED',insertDataOption:'INSERT_ROWS',resource:{values:[filaArray]}});console.log('📤 Agregado como nuevo');}
+                else{await gapi.client.sheets.spreadsheets.values.update({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:`Clientes!A${idx}:I${idx}`,valueInputOption:'USER_ENTERED',resource:{values:[filaArray]}});console.log('✏️ Actualizado fila',idx);}
+            }else{
+                await gapi.client.sheets.spreadsheets.values.append({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I',valueInputOption:'USER_ENTERED',insertDataOption:'INSERT_ROWS',resource:{values:[filaArray]}});
+                console.log('📤 Nuevo cliente agregado');
             }
-        };
+            console.log('👤 [CLIENTES] ========== GUARDADO ==========');
+        }catch(e){console.error('❌ Error Sheets:',e);}
+    }
+};
 
-        const CONFIG = {
-            negocio: {
-                nombre: "Tacos Chonchos",
-                slogan: "Comidas Caseras 100%",
-                direccion: "Adolfo prieto 2210, col. obrera",
-                whatsapp: "528181866825",
-                telefono: "8183405574"
-            },
-            productos: [],
-            envios: {},
-            clientesRegistrados: [],
-            reglasCashback: []
-        };
-
-        const Estado = {
-            cliente: null,
-            carrito: [],
-            tipoServicio: "",
-            costoEnvio: 0,
-            zonaSeleccionada: "",
-            datosCargados: false,
-            productoActual: null,
-            cantidadesVariantes: {}
-        };
-        const DIAS_SEMANA = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
-        const HOY = DIAS_SEMANA[new Date().getDay()];
-
-        // ########################################################################
-        // ################## MÓDULO 1: UI (UTILIDADES) ##########################
-        // ########################################################################
-        const UI = {
-            mostrarPantalla(id) {
-                document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
-                const pantalla = document.getElementById(id);
-                if (pantalla) {
-                    pantalla.classList.add('activa');
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                }
-            },
-            actualizarPasos(n) {
-                const ind = document.getElementById('pasosIndicador');
-                if (!ind) return;
-                ind.style.display = 'flex';
-                for (let i = 1; i <= 3; i++) {
-                    const p = document.getElementById('paso' + i);
-                    if (!p) continue;
-                    p.classList.remove('completado', 'activo-paso');
-                    if (i < n) p.classList.add('completado');
-                    if (i === n) p.classList.add('activo-paso');
-                }
-            }
-        };
-
-        // ########################################################################
-        // ################## MÓDULO 2: CARGA DE DATOS (SHEETS) ##################
-        // ########################################################################
-        const ModuloCarga = {
-            async inicializar() {
-                console.log('🔄 [CARGA] Iniciando carga desde Google Sheets...');
-                document.getElementById('spinnerCarga').style.display = 'block';
-                try {
-                    await new Promise((resolve, reject) => {
-                        gapi.load('client', async () => {
-                            try {
-                                await gapi.client.init({
-                                    apiKey: SHEETS_CONFIG.apiKey,
-                                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-                                });
-                                console.log('🔑 [CARGA] API inicializada');
-                                resolve();
-                            } catch (error) {
-                                reject(error);
-                            }
-                        });
-                    });
-                    const [productos, envios, datosNegocio, reglasCashback, clientes] = await Promise.all([
-                        this.cargarProductos(), this.cargarEnvios(), this.cargarDatosNegocio(), this.cargarReglasCashback(), this.cargarClientes()
-                    ]);
-                    CONFIG.productos = productos;
-                    CONFIG.envios = envios;
-                    CONFIG.clientesRegistrados = clientes;
-                    CONFIG.reglasCashback = reglasCashback;
-                    if (datosNegocio.nombreNegocio) CONFIG.negocio.nombre = datosNegocio.nombreNegocio;
-                    if (datosNegocio.whatsApp1) CONFIG.negocio.whatsapp = datosNegocio.whatsApp1;
-                    if (datosNegocio.direccionFisica) CONFIG.negocio.direccion = datosNegocio.direccionFisica;
-                    if (datosNegocio.telFijo1) CONFIG.negocio.telefono = datosNegocio.telFijo1;
-                    Estado.datosCargados = true;
-                    console.log('✅ [CARGA] Productos:', CONFIG.productos.length, '| Cashback:', CONFIG.reglasCashback.length, '| Clientes:', CONFIG.clientesRegistrados.length);
-                    document.getElementById('spinnerCarga').style.display = 'none';
-                    ModuloCliente.actualizarZonasEnvio();
-                    ModuloClientes.inicializarCache();
-                } catch (error) {
-                    console.error('❌ [CARGA] Error:', error);
-                    document.getElementById('errorCarga').textContent = 'Error al conectar con Google Sheets.';
-                    document.getElementById('spinnerCarga').style.display = 'none';
-                    this.cargarDatosRespaldo();
-                }
-            },
-            async cargarProductos() {
-                try {
-                    const resp = await gapi.client.sheets.spreadsheets.values.get({
-                        spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                        range: SHEETS_CONFIG.ranges.productos
-                    });
-                    const filas = resp.result.values || [];
-                    if (filas.length < 2) return [];
-                    return filas.slice(1).filter(f => f && f[0]).map((f, i) => ({
-                        id: i + 1,
-                        nombre: (f[0] || '').trim(),
-                        precioRegular: parseFloat(f[1]) || 0,
-                        precioPromo: f[2] ? parseFloat(f[2]) : null,
-                        categoria: (f[3] || '').trim(),
-                        descripcion: (f[5] || '').trim(),
-                        variantes: this.parseVariantes(f[6] || '')
-                    }));
-                } catch (error) {
-                    return [];
-                }
-            },
-            async cargarEnvios() {
-                try {
-                    const resp = await gapi.client.sheets.spreadsheets.values.get({
-                        spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                        range: SHEETS_CONFIG.ranges.envios
-                    });
-                    const filas = resp.result.values || [];
-                    const envios = {};
-                    filas.slice(1).forEach(f => {
-                        if (f && f[0] && f[1]) envios[f[0].trim()] = parseFloat(f[1]) || 0;
-                    });
-                    return Object.keys(envios).length > 0 ? envios : {
-                        "Obrera": 15,
-                        "Otro": 25,
-                        "Arena": 15
-                    };
-                } catch (error) {
-                    return {
-                        "Obrera": 15,
-                        "Otro": 25
-                    };
-                }
-            },
-            async cargarDatosNegocio() {
-                try {
-                    const resp = await gapi.client.sheets.spreadsheets.values.get({
-                        spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                        range: SHEETS_CONFIG.ranges.datos
-                    });
-                    const filas = resp.result.values || [];
-                    const datos = {};
-                    filas.slice(1).forEach(f => {
-                        if (f && f[0] && f[2] && f[2].trim().toUpperCase() === 'SI') datos[f[0].trim()] = f[1] ? f[1].trim() : '';
-                    });
-                    return datos;
-                } catch (error) {
-                    return {};
-                }
-            },
-            async cargarReglasCashback() {
-                try {
-                    const resp = await gapi.client.sheets.spreadsheets.values.get({
-                        spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                        range: SHEETS_CONFIG.ranges.cashback
-                    });
-                    const filas = resp.result.values || [];
-                    return filas.slice(1).filter(f => f && f[0]).map(f => ({
-                        tipo: f[0] ? f[0].trim() : '',
-                        valor: parseFloat(f[1]) || 0,
-                        accion: f[2] ? f[2].trim().toLowerCase() : 'porcentaje',
-                        restricciones: f[3] ? f[3].trim() : '',
-                        categoria: f[4] ? f[4].trim() : 'TODAS',
-                        producto: f[5] ? f[5].trim() : '*',
-                        seAplica: f[6] ? f[6].trim().toUpperCase() : 'FALSE',
-                        diasAplica: f[7] ? f[7].trim().toUpperCase() : 'TODOS'
-                    }));
-                } catch (error) {
-                    return [];
-                }
-            },
-            async cargarClientes() {
-                try {
-                    const resp = await gapi.client.sheets.spreadsheets.values.get({
-                        spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                        range: SHEETS_CONFIG.ranges.clientes
-                    });
-                    const filas = resp.result.values || [];
-                    return filas.slice(1).filter(f => f && f[0]).map(f => ({
-                        whatsapp: f[0] || '',
-                        nombre: f[1] || '',
-                        direccion: f[2] || '',
-                        zona: f[3] || '',
-                        saldoCashback: parseFloat(f[4]) || 0,
-                        fechaVencimiento: f[5] || '',
-                        ultimaCompra: parseFloat(f[6]) || 0,
-                        fechaRegistro: f[7] || '',
-                        fechaMovimiento: f[8] || ''
-                    }));
-                } catch (error) {
-                    return [];
-                }
-            },
-            parseVariantes(str) {
-                const v = {};
-                if (!str) return v;
-                str.split(',').forEach(p => {
-                    let [n, e] = p.split(':');
-                    if (n) v[n.trim()] = parseFloat((e || '0').replace('+', '')) || 0;
-                });
-                return v;
-            },
-            cargarDatosRespaldo() {
-                CONFIG.productos = [{
-                        id: 1,
-                        nombre: "Picadillo",
-                        precioRegular: 25,
-                        precioPromo: 22,
-                        categoria: "Tacos de Guisos",
-                        descripcion: "Picadillo casero",
-                        variantes: {
-                            "Maíz": 0,
-                            "Harina": 5
-                        }
-                    },
-                    {
-                        id: 2,
-                        nombre: "Deshebrada",
-                        precioRegular: 25,
-                        precioPromo: 22,
-                        categoria: "Tacos de Guisos",
-                        descripcion: "Deshebrada en salsa",
-                        variantes: {
-                            "Maíz": 0,
-                            "Harina": 5
-                        }
-                    }
-                ];
-                CONFIG.envios = {
-                    "Obrera": 15,
-                    "Otro": 25
-                };
-                CONFIG.reglasCashback = [];
-            }
-        };
-
-        // ########################################################################
-        // ################## MÓDULO 3: GESTIÓN DE CLIENTES (FORMULARIO) #########
-        // ########################################################################
-        const ModuloCliente = {
-            actualizarZonasEnvio() {
-                const selZona = document.getElementById('selZona');
-                if (!selZona || Object.keys(CONFIG.envios).length === 0) return;
-                let opciones = '<option value="">Selecciona tu zona...</option>';
-                for (const [zona, costo] of Object.entries(CONFIG.envios)) {
-                    opciones += `<option value="${zona}">${zona} - $${costo.toFixed(2)}</option>`;
-                }
-                selZona.innerHTML = opciones;
-            },
-            validarWhatsApp() {
-                const input = document.getElementById('txtWhatsApp');
-                if (!input) return;
-                let whatsapp = input.value.replace(/\D/g, '');
-                input.value = whatsapp;
-                if (whatsapp.length === 10) this.buscarCliente(whatsapp);
-            },
-            buscarCliente(whatsapp) {
-                const mensajeDiv = document.getElementById('mensajeCliente');
-                const cliente = ModuloClientes.buscar(whatsapp);
-                if (cliente) {
-                    document.getElementById('txtNombre').value = cliente.nombre || '';
-                    document.getElementById('txtDireccion').value = cliente.direccion || '';
-                    if (cliente.zona) document.getElementById('selZona').value = cliente.zona;
-                    mensajeDiv.innerHTML = `<div class="alert alert-success">✅ ¡Bienvenido de nuevo ${cliente.nombre}!<br>💰 Cashback acumulado: $${cliente.saldoCashback.toFixed(2)}</div>`;
-                    Estado.cliente = {
-                        ...cliente,
-                        esNuevo: false
-                    };
-                } else {
-                    mensajeDiv.innerHTML = '<div class="alert alert-info">🆕 Cliente nuevo - Completa tus datos</div>';
-                    Estado.cliente = {
-                        whatsapp,
-                        esNuevo: true
-                    };
-                }
-            },
-            cambiarServicio() {
-                const servicio = document.getElementById('selServicio').value;
-                Estado.tipoServicio = servicio;
-                document.getElementById('divDomicilio').style.display = (servicio === 'domicilio') ? 'block' : 'none';
-                if (servicio !== 'domicilio') {
-                    Estado.costoEnvio = 0;
-                    Estado.zonaSeleccionada = '';
-                }
-            },
-            validarDatosCliente() {
-                const whatsapp = document.getElementById('txtWhatsApp').value.replace(/\D/g, '');
-                const nombre = document.getElementById('txtNombre').value.trim();
-                const servicio = document.getElementById('selServicio').value;
-                if (!whatsapp || whatsapp.length !== 10) {
-                    alert('⚠️ WhatsApp inválido');
-                    return false;
-                }
-                if (!nombre || nombre.length < 3) {
-                    alert('⚠️ Ingresa el nombre');
-                    return false;
-                }
-                if (!servicio) {
-                    alert('⚠️ Selecciona el servicio');
-                    return false;
-                }
-                Estado.cliente = {
-                    ...Estado.cliente,
-                    whatsapp,
-                    nombre,
-                    servicio
-                };
-                if (servicio === 'domicilio') {
-                    const direccion = document.getElementById('txtDireccion').value.trim();
-                    const zona = document.getElementById('selZona').value;
-                    if (!direccion || direccion.length < 5) {
-                        alert('⚠️ Ingresa la dirección');
-                        return false;
-                    }
-                    if (!zona) {
-                        alert('⚠️ Selecciona la zona');
-                        return false;
-                    }
-                    Estado.zonaSeleccionada = zona;
-                    Estado.costoEnvio = CONFIG.envios[zona] || 0;
-                    Estado.cliente.direccion = direccion;
-                    Estado.cliente.zona = zona;
-                }
-                return true;
-            },
-            iniciarPedido() {
-                if (!this.validarDatosCliente()) return;
-                UI.actualizarPasos(2);
-                UI.mostrarPantalla('pantallaMenu');
-                ModuloPedido.inicializar();
-            },
-            regresarCliente() {
-                UI.actualizarPasos(1);
-                UI.mostrarPantalla('pantallaCliente');
-            }
-        };
-
-        // ########################################################################
-        // ################## MÓDULO 4: POPUP DE VARIANTES #######################
-        // ########################################################################
-        const ModuloVariantes = {
-            abrir(p) {
-                if (!p || !p.variantes || Object.keys(p.variantes).length === 0) {
-                    ModuloPedido.agregarDirecto(p);
-                    return;
-                }
-                Estado.productoActual = p;
-                Estado.cantidadesVariantes = {};
-                for (let n in p.variantes) Estado.cantidadesVariantes[n] = 0;
-                this.renderizarModal();
-                document.getElementById('modalVariantes').classList.add('activo');
-                document.body.style.overflow = 'hidden';
-            },
-            cerrar() {
-                document.getElementById('modalVariantes').classList.remove('activo');
-                document.body.style.overflow = '';
-                Estado.productoActual = null;
-            },
-            renderizarModal() {
-                const p = Estado.productoActual;
-                document.getElementById('modalTitulo').textContent = '🌮 ' + p.nombre;
-                const pr = p.precioPromo || p.precioRegular;
-                let ph = `<span class="precio-promo">$${pr.toFixed(2)} c/u</span>`;
-                if (p.precioPromo && p.precioPromo < p.precioRegular) ph += `<span class="precio-regular">$${p.precioRegular.toFixed(2)}</span>`;
-                let h = '';
-                for (const [n, e] of Object.entries(p.variantes)) {
-                    h += `<div class="variante-item"><div class="variante-info"><div class="variante-nombre">${n}</div><div class="variante-extra${e === 0 ? ' gratis' : ''}">${e > 0 ? '+$' + e.toFixed(2) + ' c/u' : 'Sin costo'}</div></div><div class="cantidad-control"><button class="btn-cantidad menos" onclick="ModuloVariantes.cambiarCantidad('${n}',-1)">−</button><span class="cantidad-numero" id="cant-${n}">0</span><button class="btn-cantidad mas" onclick="ModuloVariantes.cambiarCantidad('${n}',1)">+</button></div></div>`;
-                }
-                document.getElementById('modalBody').innerHTML = h;
-                this.actualizarResumen();
-            },
-            cambiarCantidad(v, d) {
-                const n = (Estado.cantidadesVariantes[v] || 0) + d;
-                if (n < 0) return;
-                Estado.cantidadesVariantes[v] = n;
-                document.getElementById('cant-' + v).textContent = n;
-                this.actualizarResumen();
-            },
-            actualizarResumen() {
-                const p = Estado.productoActual;
-                const t = Object.values(Estado.cantidadesVariantes).reduce((a, b) => a + b, 0);
-                const btn = document.getElementById('btnConfirmarVariantes');
-                const r = document.getElementById('modalResumen');
-                if (t === 0) {
-                    r.classList.remove('visible');
-                    btn.disabled = true;
-                    return;
-                }
-                btn.disabled = false;
-                btn.textContent = `✓ Agregar ${t}`;
-                const pb = p.precioPromo || p.precioRegular;
-                let total = 0,
-                    items = [];
-                for (const [n, c] of Object.entries(Estado.cantidadesVariantes)) {
-                    if (c > 0) {
-                        const ex = p.variantes[n] || 0;
-                        const pu = pb + ex;
-                        const st = pu * c;
-                        total += st;
-                        items.push(`${c}x ${n} = $${st.toFixed(2)}`);
-                    }
-                }
-                r.classList.add('visible');
-                r.innerHTML = `<strong>Resumen:</strong><br>${items.join('<br>')}<div style="font-size:18px;">Total: $${total.toFixed(2)}</div>`;
-            },
-            confirmar() {
-                const p = Estado.productoActual;
-                const pb = p.precioPromo || p.precioRegular;
-                let added = 0;
-                for (const [v, c] of Object.entries(Estado.cantidadesVariantes)) {
-                    if (c > 0) {
-                        const ex = p.variantes[v] || 0;
-                        const pu = pb + ex;
-                        const exist = Estado.carrito.find(i => i.id === p.id && i.variante === v);
-                        if (exist) exist.cantidad += c;
-                        else Estado.carrito.push({
-                            id: p.id,
-                            nombre: p.nombre,
-                            variante: v,
-                            precio: pu,
-                            cantidad: c,
-                            categoria: p.categoria
-                        });
-                        added += c;
-                    }
-                }
-                if (added > 0) {
-                    const btn = document.querySelector(`[data-producto-id="${p.id}"]`);
-                    if (btn) {
-                        const txt = btn.textContent;
-                        btn.textContent = `✓ ${added}`;
-                        btn.classList.add('agregado');
-                        setTimeout(() => {
-                            btn.textContent = txt;
-                            btn.classList.remove('agregado');
-                        }, 800);
-                    }
-                }
-                ModuloPedido.actualizarTicket();
-                this.cerrar();
-            }
-        };
-
-        // ########################################################################
-        // ################## MÓDULO 5: CÁLCULO DE CASHBACK ######################
-        // ########################################################################
-        const ModuloCashback = {
-            obtenerReglasActivas() {
-                if (!CONFIG.reglasCashback || CONFIG.reglasCashback.length === 0) return [];
-                return CONFIG.reglasCashback.filter(r => {
-                    const sa = (r.seAplica || '').toString().toUpperCase().trim();
-                    return sa === 'TRUE' || sa === 'SI';
-                }).map(r => ({
-                    tipo: (r.tipo || '').trim(),
-                    valor: parseFloat(r.valor) || 0,
-                    accion: (r.accion || 'porcentaje').toString().toLowerCase().includes('pesos') ? 'pesos' : 'porcentaje',
-                    minCompra: parseFloat((r.restricciones || '').toString().replace(/[^0-9.]/g, '')) || 0,
-                    diasPermitidos: this.parsearDias(r.diasAplica || ''),
-                    categoriasFiltro: this.parsearLista(r.categoria || ''),
-                    productosFiltro: this.parsearLista(r.producto || '')
-                }));
-            },
-            parsearDias(str) {
-                if (!str || str === '-' || str.toUpperCase() === 'TODOS') return null;
-                const map = {
-                    LUN: 'LUNES',
-                    MAR: 'MARTES',
-                    MIE: 'MIERCOLES',
-                    JUE: 'JUEVES',
-                    VIE: 'VIERNES',
-                    SAB: 'SABADO',
-                    DOM: 'DOMINGO'
-                };
-                let s = str.toUpperCase();
-                for (let [k, v] of Object.entries(map)) s = s.replace(new RegExp(k, 'g'), v);
-                return s.split(',').map(d => d.trim()).filter(d => d);
-            },
-            parsearLista(str) {
-                if (!str || str === '-' || str === '*' || str.toUpperCase() === 'TODAS' || str.toUpperCase() === 'TODOS') return null;
-                return str.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
-            },
-            calcular(subtotal, carrito) {
-                const reglas = this.obtenerReglasActivas();
-                if (!reglas.length) return {
-                    total: 0,
-                    detalle: [],
-                    aplica: false
-                };
-                let total = 0,
-                    detalle = [];
-                for (const r of reglas) {
-                    if (r.diasPermitidos && !r.diasPermitidos.includes(HOY)) continue;
-                    if (r.minCompra > 0 && subtotal < r.minCompra) continue;
-                    const filtrado = carrito.filter(i => {
-                        if (r.categoriasFiltro && !r.categoriasFiltro.includes(i.categoria.toUpperCase())) return false;
-                        if (r.productosFiltro && !r.productosFiltro.includes(i.nombre.toUpperCase())) return false;
-                        return true;
-                    });
-                    if (!filtrado.length) continue;
-                    const subFiltrado = filtrado.reduce((s, i) => s + (i.precio * i.cantidad), 0);
-                    let monto = r.accion === 'pesos' ? r.valor : subFiltrado * (r.valor / 100);
-                    monto = Math.round(monto * 100) / 100;
-                    total += monto;
-                    detalle.push({
-                        tipo: r.tipo,
-                        monto,
-                        accion: r.accion
-                    });
-                }
-                return {
-                    total: Math.round(total * 100) / 100,
-                    detalle,
-                    aplica: total > 0
-                };
-            }
-        };
-
-        // ########################################################################
-        // ################## MÓDULO 6: GESTIÓN DE PEDIDOS #######################
-        // ########################################################################
-        const ModuloPedido = {
-            inicializar() {
-                this.cargarCategorias();
-                const cats = [...new Set(CONFIG.productos.map(p => p.categoria))];
-                if (cats.length) this.mostrarProductos(cats[0]);
-                this.actualizarTicket();
-            },
-            cargarCategorias() {
-                const cats = [...new Set(CONFIG.productos.map(p => p.categoria))];
-                const c = document.getElementById('categoriaContainer');
-                if (!cats.length) return;
-                const m = Math.ceil(cats.length / 2),
-                    f1 = cats.slice(0, m),
-                    f2 = cats.slice(m);
-                let h = '<div class="categoria-fila">';
-                f1.forEach((cat, i) => h += `<span class="cat-tab${i === 0 ? ' activo' : ''}" onclick="ModuloPedido.mostrarProductos('${cat.replace(/'/g, "\\'")}',this)">${cat}</span>`);
-                h += '</div>';
-                if (f2.length) {
-                    h += '<div class="categoria-fila">';
-                    f2.forEach(cat => h += `<span class="cat-tab" onclick="ModuloPedido.mostrarProductos('${cat.replace(/'/g, "\\'")}',this)">${cat}</span>`);
-                    h += '</div>';
-                }
-                c.innerHTML = h;
-            },
-            mostrarProductos(cat, el) {
-                if (el) {
-                    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('activo'));
-                    el.classList.add('activo');
-                }
-                const prods = CONFIG.productos.filter(p => p.categoria === cat);
-                const c = document.getElementById('listaProductos');
-                if (!prods.length) {
-                    c.innerHTML = '<div class="alert alert-warning">Sin productos</div>';
-                    return;
-                }
-                c.innerHTML = prods.map(p => {
-                    const promo = p.precioPromo && p.precioPromo < p.precioRegular;
-                    const vars = p.variantes && Object.keys(p.variantes).length > 0;
-                    const precio = promo ? `<div class="prod-precios"><span class="prod-precio">$${p.precioPromo.toFixed(2)}</span><span class="prod-regular">$${p.precioRegular.toFixed(2)}</span><span class="prod-promo-badge">PROMO</span></div>` : `<div class="prod-precios"><span class="prod-precio">$${p.precioRegular.toFixed(2)}</span></div>`;
-                    return `<div class="producto-item"><div class="prod-info"><div class="prod-nombre">${p.nombre}${vars ? ' <span class="prod-variantes-badge">🔽</span>' : ''}</div>${p.descripcion ? `<div class="prod-desc">${p.descripcion}</div>` : ''}${precio}</div><button class="btn-agregar${vars ? ' tiene-variantes' : ''}" data-producto-id="${p.id}" onclick="ModuloPedido.clicAgregar(${p.id},this)">${vars ? '🔽' : '+ Agregar'}</button></div>`;
-                }).join('');
-            },
-            clicAgregar(id, btn) {
-                const p = CONFIG.productos.find(p => p.id === id);
-                if (!p) return;
-                if (p.variantes && Object.keys(p.variantes).length > 0) ModuloVariantes.abrir(p);
-                else this.agregarDirecto(p, btn);
-            },
-            agregarDirecto(p, btn) {
-                const pr = p.precioPromo || p.precioRegular;
-                const ex = Estado.carrito.find(i => i.id === p.id && i.variante === 'Estándar');
-                if (ex) ex.cantidad++;
-                else Estado.carrito.push({
-                    id: p.id,
-                    nombre: p.nombre,
-                    variante: 'Estándar',
-                    precio: pr,
-                    cantidad: 1,
-                    categoria: p.categoria
-                });
-                this.actualizarTicket();
-                if (btn) {
-                    const t = btn.textContent;
-                    btn.textContent = '✓';
-                    btn.classList.add('agregado');
-                    setTimeout(() => {
-                        btn.textContent = t;
-                        btn.classList.remove('agregado');
-                    }, 700);
-                }
-            },
-            calcSubtotal() {
-                return Estado.carrito.reduce((s, i) => s + (i.precio * i.cantidad), 0);
-            },
-            actualizarTicket() {
-                const items = document.getElementById('ticketItems'),
-                    totalEl = document.getElementById('ticketTotal'),
-                    resumen = document.getElementById('ticketResumenInfo');
-                const carrito = document.getElementById('carritoResumen'),
-                    flotante = document.getElementById('btnCarritoFlotante'),
-                    cont = document.getElementById('contadorCarrito');
-                const totalItems = Estado.carrito.reduce((s, i) => s + i.cantidad, 0);
-                if (!totalItems) {
-                    carrito.style.display = 'none';
-                    flotante.style.display = 'none';
-                    return;
-                }
-                carrito.style.display = 'block';
-                flotante.style.display = 'flex';
-                cont.textContent = totalItems;
-                let subtotal = 0;
-                items.innerHTML = Estado.carrito.map((item, i) => {
-                    const t = item.precio * item.cantidad;
-                    subtotal += t;
-                    return `<div class="ticket-item"><span>${item.cantidad}x ${item.nombre} (${item.variante})</span><span>$${t.toFixed(2)}</span><span class="ticket-item-remove" onclick="ModuloPedido.eliminarItem(${i})">✕</span></div>`;
-                }).join('');
-                const cash = ModuloCashback.calcular(subtotal, Estado.carrito);
-                resumen.innerHTML = `💰 Subtotal: $${subtotal.toFixed(2)}${Estado.costoEnvio > 0 ? ' | 🚚 Envío: $' + Estado.costoEnvio.toFixed(2) : ''}`;
-                totalEl.innerHTML = `TOTAL: $${(subtotal + Estado.costoEnvio).toFixed(2)}`;
-                this.mostrarCashback(cash);
-            },
-            mostrarCashback(r) {
-                const detalle = document.getElementById('cashbackDetalle');
-                if (!r.aplica || r.total === 0) {
-                    detalle.innerHTML = '<div class="ticket-cashback-na">No aplica cashback</div>';
-                    return;
-                }
-                let h = '';
-                r.detalle.forEach(d => {
-                    h += `<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>🎁 ${d.tipo} (${d.accion})</span><span>+$${d.monto.toFixed(2)}</span></div>`;
-                });
-                h += `<div style="text-align:center;font-weight:700;margin-top:6px;border-top:1px dashed #F9A825;padding-top:6px;">🏆 Total: $${r.total.toFixed(2)}</div>`;
-                detalle.innerHTML = h;
-            },
-            eliminarItem(i) {
-                Estado.carrito.splice(i, 1);
-                this.actualizarTicket();
-            },
-            vaciarCarrito() {
-                if (Estado.carrito.length && confirm('¿Vaciar carrito?')) {
-                    Estado.carrito = [];
-                    this.actualizarTicket();
-                }
-            },
-            irAlCarrito() {
-                document.getElementById('carritoResumen').scrollIntoView({
-                    behavior: 'smooth'
-                });
-            },
-            mostrarConfirmacion() {
-                if (!Estado.carrito.length) {
-                    alert('Agrega productos');
-                    return;
-                }
-                UI.actualizarPasos(3);
-                UI.mostrarPantalla('pantallaConfirmacion');
-                ModuloEnvio.mostrarResumen();
-            },
-            volverAlMenu() {
-                UI.actualizarPasos(2);
-                UI.mostrarPantalla('pantallaMenu');
-            }
-        };
-
-        // ########################################################################
-        // ################## MÓDULO 7: CONFIRMACIÓN Y ENVÍO #####################
-        // ########################################################################
-        const ModuloEnvio = {
-            mostrarResumen() {
-                const det = document.getElementById('confirmacionDetalle'),
-                    tot = document.getElementById('confirmacionTotal');
-                const sub = ModuloPedido.calcSubtotal(),
-                    cash = ModuloCashback.calcular(sub, Estado.carrito);
-                let h = `<p><b>Cliente:</b> ${Estado.cliente.nombre}</p><p><b>WhatsApp:</b> ${Estado.cliente.whatsapp}</p><p><b>Servicio:</b> ${Estado.tipoServicio}</p>`;
-                if (Estado.tipoServicio === 'domicilio') h += `<p><b>Dirección:</b> ${Estado.cliente.direccion}</p><p><b>Zona:</b> ${Estado.zonaSeleccionada} ($${Estado.costoEnvio})</p>`;
-                h += '<hr><b>Productos:</b>';
-                Estado.carrito.forEach(i => h += `<p>${i.cantidad}x ${i.nombre} (${i.variante}) = $${(i.precio * i.cantidad).toFixed(2)}</p>`);
-                if (cash.aplica) {
-                    h += '<hr><b>🎁 Cashback:</b>';
-                    cash.detalle.forEach(d => h += `<p>${d.tipo}: $${d.monto.toFixed(2)}</p>`);
-                    h += `<p><b>Total: $${cash.total.toFixed(2)}</b></p>`;
-                }
-                det.innerHTML = h;
-                const tf = sub + Estado.costoEnvio;
-                tot.innerHTML = `<div>Subtotal: $${sub.toFixed(2)}</div>${Estado.costoEnvio > 0 ? `<div>Envío: $${Estado.costoEnvio.toFixed(2)}</div>` : ''}<div style="font-size:30px;">$${tf.toFixed(2)}</div>${cash.total > 0 ? `<div>🎁 Cashback: $${cash.total.toFixed(2)}</div>` : ''}`;
-            },
-            generarMensaje() {
-                const sub = ModuloPedido.calcSubtotal(),
-                    cash = ModuloCashback.calcular(sub, Estado.carrito);
-                const f = new Date();
-                let m = `🌮 *PEDIDO - TACOS CHONCHOS* 🌮\n\n📅 ${f.toLocaleDateString('es-MX')}\n🕐 ${f.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}\n\n👤 ${Estado.cliente.nombre}\n📱 +52${Estado.cliente.whatsapp}\n📦 ${Estado.tipoServicio}\n`;
-                if (Estado.tipoServicio === 'domicilio') m += `📍 ${Estado.cliente.direccion}\n🗺️ ${Estado.zonaSeleccionada}\n`;
-                m += '\n📋 *PRODUCTOS:*\n';
-                Estado.carrito.forEach(i => m += `  • ${i.cantidad}x ${i.nombre} (${i.variante}) = $${(i.precio * i.cantidad).toFixed(2)}\n`);
-                const tf = sub + Estado.costoEnvio;
-                m += `\n💰 Subtotal: $${sub.toFixed(2)}`;
-                if (Estado.costoEnvio > 0) m += `\n🚚 Envío: $${Estado.costoEnvio.toFixed(2)}`;
-                m += `\n💵 TOTAL: $${tf.toFixed(2)}`;
-                if (cash.total > 0) m += `\n🎁 Cashback: $${cash.total.toFixed(2)}`;
-                m += `\n\n📍 ${CONFIG.negocio.direccion}\n📞 ${CONFIG.negocio.telefono}`;
-                return m;
-            },
-            enviarWhatsApp() {
-                if (!Estado.carrito.length) {
-                    alert('⚠️ El carrito está vacío');
-                    return;
-                }
-                if (confirm('📲 ¿Confirmas el envío del pedido por WhatsApp?')) {
-                    window.open(`https://wa.me/${CONFIG.negocio.whatsapp}?text=${encodeURIComponent(this.generarMensaje())}`, '_blank');
-                    this.guardarEnHistorial();
-                    const sub = ModuloPedido.calcSubtotal(),
-                        cash = ModuloCashback.calcular(sub, Estado.carrito).total;
-                    ModuloClientes.procesarCliente({
-                        whatsapp: Estado.cliente.whatsapp,
-                        nombre: Estado.cliente.nombre,
-                        direccion: Estado.cliente.direccion || '',
-                        zona: Estado.zonaSeleccionada || Estado.cliente.zona || ''
-                    }, sub, cash);
-                }
-            },
-            guardarEnHistorial() {
-                try {
-                    const h = JSON.parse(localStorage.getItem('historialPedidos') || '[]');
-                    const sub = ModuloPedido.calcSubtotal();
-                    h.push({
-                        fecha: new Date().toISOString(),
-                        cliente: Estado.cliente,
-                        carrito: Estado.carrito,
-                        total: sub + Estado.costoEnvio,
-                        cashback: ModuloCashback.calcular(sub, Estado.carrito).total,
-                        servicio: Estado.tipoServicio,
-                        zona: Estado.zonaSeleccionada
-                    });
-                    localStorage.setItem('historialPedidos', JSON.stringify(h));
-                } catch (e) {}
-            },
-            nuevoPedido() {
-                Estado.cliente = null;
-                Estado.carrito = [];
-                Estado.tipoServicio = '';
-                Estado.costoEnvio = 0;
-                ['txtWhatsApp', 'txtNombre', 'txtDireccion'].forEach(id => document.getElementById(id).value = '');
-                document.getElementById('selServicio').value = '';
-                document.getElementById('divDomicilio').style.display = 'none';
-                document.getElementById('carritoResumen').style.display = 'none';
-                document.getElementById('btnCarritoFlotante').style.display = 'none';
-                UI.mostrarPantalla('pantallaCliente');
-            }
-        };
-
-        // ########################################################################
-        // ################## MÓDULO 8: REGISTRO INTELIGENTE DE CLIENTES #########
-        // ########################################################################
-        const ModuloClientes = {
-            _config: {
-                activo: true,
-                rangoSheet: 'Clientes!A:I',
-                diasVencimientoNuevo: 30,
-                diasVencimientoExistente: 4,
-                debug: true
-            },
-            _cache: {},
-            _cacheInicializado: false,
-            inicializarCache() {
-                if (this._cacheInicializado) return;
-                this._cache = {};
-                if (CONFIG.clientesRegistrados && CONFIG.clientesRegistrados.length > 0) {
-                    CONFIG.clientesRegistrados.forEach(c => {
-                        if (c.whatsapp) this._cache[c.whatsapp] = {
-                            whatsapp: c.whatsapp || '',
-                            nombre: c.nombre || '',
-                            direccion: c.direccion || '',
-                            zona: c.zona || '',
-                            saldoCashback: parseFloat(c.saldoCashback || 0),
-                            fechaVencimiento: c.fechaVencimiento || '',
-                            ultimaCompra: parseFloat(c.ultimaCompra || 0),
-                            fechaRegistro: c.fechaRegistro || '',
-                            fechaMovimiento: c.fechaMovimiento || ''
-                        };
-                    });
-                }
-                this._cacheInicializado = true;
-                this._log('💾 Caché:', Object.keys(this._cache).length, 'clientes');
-            },
-            buscar(whatsapp) {
-                this.inicializarCache();
-                return this._cache[whatsapp] || null;
-            },
-            existe(whatsapp) {
-                return this.buscar(whatsapp) !== null;
-            },
-            _formatearFecha(f) {
-                if (!f || isNaN(f.getTime())) return '';
-                const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-                return `${f.getDate().toString().padStart(2,'0')}-${meses[f.getMonth()]}-${f.getFullYear()}`;
-            },
-            _parsearFecha(str) {
-                if (!str) return null;
-                const meses = {
-                    ene: 0,
-                    feb: 1,
-                    mar: 2,
-                    abr: 3,
-                    may: 4,
-                    jun: 5,
-                    jul: 6,
-                    ago: 7,
-                    sep: 8,
-                    oct: 9,
-                    nov: 10,
-                    dic: 11
-                };
-                const p = str.split('-');
-                if (p.length !== 3) return null;
-                const d = parseInt(p[0]),
-                    m = meses[p[1].toLowerCase()],
-                    a = parseInt(p[2]);
-                if (isNaN(d) || m === undefined || isNaN(a)) return null;
-                return new Date(a, m, d);
-            },
-            _calcularVencimiento(clienteExistente) {
-                const hoy = new Date();
-                if (!clienteExistente || clienteExistente.saldoCashback === 0) {
-                    const v = new Date(hoy);
-                    v.setDate(v.getDate() + this._config.diasVencimientoNuevo);
-                    return this._formatearFecha(v);
-                }
-                if (clienteExistente.fechaVencimiento) {
-                    const fa = this._parsearFecha(clienteExistente.fechaVencimiento);
-                    if (fa) {
-                        fa.setDate(fa.getDate() + this._config.diasVencimientoExistente);
-                        return this._formatearFecha(fa);
-                    }
-                }
-                const v = new Date(hoy);
-                v.setDate(v.getDate() + this._config.diasVencimientoExistente);
-                return this._formatearFecha(v);
-            },
-            async procesarCliente(datosCliente, montoCompra, cashbackGenerado) {
-                if (!this._config.activo) return;
-                if (!datosCliente || !datosCliente.whatsapp) return;
-                this.inicializarCache();
-                const whatsapp = datosCliente.whatsapp;
-                const clienteExistente = this.buscar(whatsapp);
-                const fechaHoy = this._formatearFecha(new Date());
-                let fila;
-                if (clienteExistente) {
-                    this._log('🔄 Actualizando:', whatsapp);
-                    const nuevoSaldo = clienteExistente.saldoCashback + (cashbackGenerado || 0);
-                    const nuevaFechaVenc = this._calcularVencimiento(clienteExistente);
-                    fila = {
-                        whatsapp,
-                        nombre: datosCliente.nombre || clienteExistente.nombre,
-                        direccion: datosCliente.direccion || clienteExistente.direccion || '',
-                        zona: datosCliente.zona || clienteExistente.zona || '',
-                        saldoCashback: nuevoSaldo,
-                        fechaVencimiento: nuevaFechaVenc,
-                        ultimaCompra: montoCompra || 0,
-                        fechaRegistro: clienteExistente.fechaRegistro || fechaHoy,
-                        fechaMovimiento: fechaHoy
-                    };
-                    this._cache[whatsapp] = fila;
-                    this._log('✅ Actualizado - Saldo:', nuevoSaldo, '| Vence:', nuevaFechaVenc);
-                } else {
-                    this._log('🆕 Nuevo:', whatsapp);
-                    const nuevaFechaVenc = this._calcularVencimiento(null);
-                    fila = {
-                        whatsapp,
-                        nombre: datosCliente.nombre || '',
-                        direccion: datosCliente.direccion || '',
-                        zona: datosCliente.zona || '',
-                        saldoCashback: cashbackGenerado || 0,
-                        fechaVencimiento: nuevaFechaVenc,
-                        ultimaCompra: montoCompra || 0,
-                        fechaRegistro: fechaHoy,
-                        fechaMovimiento: fechaHoy
-                    };
-                    this._cache[whatsapp] = fila;
-                    this._log('✅ Creado - Saldo:', fila.saldoCashback, '| Vence:', nuevaFechaVenc);
-                }
-                await this._guardarEnSheets(fila, clienteExistente !== null);
-            },
-            async _guardarEnSheets(datos, esActualizacion) {
-                try {
-                    if (esActualizacion) {
-                        await this._actualizarFila(datos);
-                    } else {
-                        await this._agregarFila(datos);
-                    }
-                } catch (error) {
-                    this._log('❌ Error Sheets:', error.message);
-                }
-            },
-            async _agregarFila(datos) {
-                const fila = [datos.whatsapp, datos.nombre, datos.direccion, datos.zona, datos.saldoCashback.toString(), datos.fechaVencimiento, datos.ultimaCompra.toString(), datos.fechaRegistro, datos.fechaMovimiento];
-                const resp = await gapi.client.sheets.spreadsheets.values.append({
-                    spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                    range: this._config.rangoSheet,
-                    valueInputOption: 'USER_ENTERED',
-                    insertDataOption: 'INSERT_ROWS',
-                    resource: {
-                        values: [fila]
-                    }
-                });
-                this._log('📤 Agregado:', resp.result.updates.updatedRange);
-            },
-            async _actualizarFila(datos) {
-                const resp = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                    range: this._config.rangoSheet
-                });
-                const filas = resp.result.values || [];
-                let idx = -1;
-                for (let i = 1; i < filas.length; i++) {
-                    if (filas[i] && filas[i][0] === datos.whatsapp) {
-                        idx = i + 1;
-                        break;
-                    }
-                }
-                if (idx === -1) {
-                    await this._agregarFila(datos);
-                    return;
-                }
-                const fila = [datos.whatsapp, datos.nombre, datos.direccion, datos.zona, datos.saldoCashback.toString(), datos.fechaVencimiento, datos.ultimaCompra.toString(), datos.fechaRegistro, datos.fechaMovimiento];
-                await gapi.client.sheets.spreadsheets.values.update({
-                    spreadsheetId: SHEETS_CONFIG.spreadsheetId,
-                    range: `Clientes!A${idx}:I${idx}`,
-                    valueInputOption: 'USER_ENTERED',
-                    resource: {
-                        values: [fila]
-                    }
-                });
-                this._log('✏️ Actualizado fila', idx);
-            },
-            setActivo(e) {
-                this._config.activo = e;
-                this._log('Módulo', e ? 'ACTIVADO' : 'DESACTIVADO');
-            },
-            _log(...args) {
-                if (this._config.debug) console.log('👤 [CLIENTES]', ...args);
-            }
-        };
-
-        // ########################################################################
-        // ################## INICIALIZACIÓN ######################################
-        // ########################################################################
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🌮 Tacos Chonchos POS - Sistema Modular Completo');
-            console.log('📦 Módulos: UI | Carga | ClienteForm | Variantes | Cashback | Pedidos | Envío | ClientesDB');
-            console.log('📅 Hoy es:', HOY);
-            await ModuloCarga.inicializar();
-            document.getElementById('modalVariantes').addEventListener('click', function(e) {
-                if (e.target === this) ModuloVariantes.cerrar();
-            });
-            console.log('✅ Sistema listo');
-        });
-    </script>
+// ====== INICIO ======
+document.addEventListener('DOMContentLoaded',async()=>{
+    console.log('🌮 Tacos Chonchos vFINAL - 8 Módulos');
+    await ModuloCarga.inicializar();
+    console.log('✅ Sistema listo');
+});
+</script>
 </body>
-
 </html>
