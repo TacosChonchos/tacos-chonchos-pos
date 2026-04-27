@@ -120,7 +120,7 @@
     <div id="carritoResumen" class="ticket" style="display:none;">
         <h3>🧾 TICKET</h3><div id="ticketItems"></div>
         <div class="ticket-resumen" id="ticketResumenInfo"></div>
-        <div class="ticket-cashback"><h4>🎁 CASHBACK</h4><div id="cashbackDetalle"></div></div>
+        <div class="ticket-cashback"><h4>🎁 CASHBACK</h4><div id="cashbackDetalle"><div class="ticket-cashback-na">Agrega productos</div></div></div>
         <div class="ticket-total" id="ticketTotal">$0.00</div>
         <div class="ticket-acciones"><button onclick="ModuloPedido.mostrarConfirmacion()">💳 REVISAR →</button><button class="btn-rojo btn-sm" onclick="ModuloPedido.vaciarCarrito()">🗑️</button><button class="btn-outline btn-sm" onclick="ModuloCliente.regresarCliente()">←</button></div>
     </div>
@@ -180,7 +180,7 @@ const ModuloCliente = {
     validarWhatsApp(){let w=document.getElementById('txtWhatsApp').value.replace(/\D/g,'');document.getElementById('txtWhatsApp').value=w;if(w.length===10)this.buscarCliente(w);},
     buscarCliente(w){
         let c=ModuloClientes.buscar(w);
-        if(c){document.getElementById('txtNombre').value=c.nombre;document.getElementById('txtDireccion').value=c.direccion;if(c.zona)document.getElementById('selZona').value=c.zona;document.getElementById('mensajeCliente').innerHTML=`<div class="alert alert-success">✅ ${c.nombre} | Cashback: $${c.saldoCashback.toFixed(2)}</div>`;Estado.cliente={...c,esNuevo:false};}
+        if(c){document.getElementById('txtNombre').value=c.nombre;document.getElementById('txtDireccion').value=c.direccion;if(c.zona)document.getElementById('selZona').value=c.zona;document.getElementById('mensajeCliente').innerHTML=`<div class="alert alert-success">✅ ${c.nombre} | Cashback: $${(c.saldoCashback||0).toFixed(2)}</div>`;Estado.cliente={...c,esNuevo:false};}
         else{document.getElementById('mensajeCliente').innerHTML='<div class="alert alert-info">🆕 Cliente nuevo</div>';Estado.cliente={whatsapp:w,esNuevo:true};}
     },
     cambiarServicio(){let s=document.getElementById('selServicio').value;Estado.tipoServicio=s;document.getElementById('divDomicilio').style.display=s==='domicilio'?'block':'none';if(s!=='domicilio')Estado.costoEnvio=0;},
@@ -202,7 +202,7 @@ const ModuloVariantes = {
 // ====== CASHBACK ======
 const ModuloCashback = {
     obtenerReglas(){return(CONFIG.reglasCashback||[]).filter(r=>{let sa=(r.seAplica||'').toUpperCase().trim();return sa==='TRUE'||sa==='SI'}).map(r=>({tipo:r.tipo,valor:parseFloat(r.valor)||0,accion:(r.accion||'').toLowerCase().includes('pesos')?'pesos':'porcentaje',minCompra:parseFloat((r.restricciones||'').replace(/[^0-9.]/g,''))||0,dias:((s)=>{if(!s||s==='TODOS')return null;let m={LUN:'LUNES',MAR:'MARTES',MIE:'MIERCOLES',JUE:'JUEVES',VIE:'VIERNES',SAB:'SABADO',DOM:'DOMINGO'};let t=s.toUpperCase();for(let[k,v]of Object.entries(m))t=t.replace(new RegExp(k,'g'),v);return t.split(',').map(d=>d.trim());})(r.diasAplica),categorias:((s)=>{if(!s||s==='TODAS')return null;return s.split(',').map(x=>x.trim().toUpperCase());})(r.categoria),productos:((s)=>{if(!s||s==='*')return null;return s.split(',').map(x=>x.trim().toUpperCase());})(r.producto)}));},
-    calcular(sub,carrito){let reglas=this.obtenerReglas();if(!reglas.length)return{total:0,detalle:[],aplica:false};let total=0,detalle=[];for(let r of reglas){if(r.dias&&!r.dias.includes(HOY))continue;if(r.minCompra>0&&sub<r.minCompra)continue;let filtrado=carrito.filter(i=>{if(r.categorias&&!r.categorias.includes(i.categoria.toUpperCase()))return false;if(r.productos&&!r.productos.includes(i.nombre.toUpperCase()))return false;return true});if(!filtrado.length)continue;let sf=filtrado.reduce((s,i)=>s+(i.precio*i.cantidad),0);let m=r.accion==='pesos'?r.valor:sf*(r.valor/100);m=Math.round(m*100)/100;total+=m;detalle.push({tipo:r.tipo,monto:m,accion:r.accion});}return{total:Math.round(total*100)/100,detalle,aplica:total>0};}
+    calcular(sub,carrito){let reglas=this.obtenerReglas();console.log('🎁 Reglas activas:',reglas.length,'Subtotal:',sub);if(!reglas.length)return{total:0,detalle:[],aplica:false};let total=0,detalle=[];for(let r of reglas){console.log('Evaluando:',r.tipo,r.accion,r.valor,'Min:',r.minCompra);if(r.dias&&!r.dias.includes(HOY)){console.log('❌ Día');continue}if(r.minCompra>0&&sub<r.minCompra){console.log('❌ Min');continue}let filtrado=carrito.filter(i=>{if(r.categorias&&!r.categorias.includes(i.categoria.toUpperCase()))return false;if(r.productos&&!r.productos.includes(i.nombre.toUpperCase()))return false;return true});if(!filtrado.length){console.log('❌ Sin productos');continue}let sf=filtrado.reduce((s,i)=>s+(i.precio*i.cantidad),0);let m=r.accion==='pesos'?r.valor:sf*(r.valor/100);m=Math.round(m*100)/100;total+=m;detalle.push({tipo:r.tipo,monto:m,accion:r.accion});console.log('✅ Aplica:',m);}return{total:Math.round(total*100)/100,detalle,aplica:total>0};}
 };
 
 // ====== PEDIDOS ======
@@ -214,7 +214,7 @@ const ModuloPedido = {
     agregarDirecto(p,btn){let pr=p.precioPromo||p.precioRegular;let ex=Estado.carrito.find(i=>i.id===p.id&&i.variante==='Estándar');if(ex)ex.cantidad++;else Estado.carrito.push({id:p.id,nombre:p.nombre,variante:'Estándar',precio:pr,cantidad:1,categoria:p.categoria});this.actualizarTicket();if(btn){let t=btn.textContent;btn.textContent='✓';btn.classList.add('agregado');setTimeout(()=>{btn.textContent=t;btn.classList.remove('agregado')},700);}},
     calcSubtotal(){return Estado.carrito.reduce((s,i)=>s+(i.precio*i.cantidad),0);},
     actualizarTicket(){let items=document.getElementById('ticketItems'),totalEl=document.getElementById('ticketTotal'),resumen=document.getElementById('ticketResumenInfo'),carrito=document.getElementById('carritoResumen'),flotante=document.getElementById('btnCarritoFlotante'),cont=document.getElementById('contadorCarrito');let ti=Estado.carrito.reduce((s,i)=>s+i.cantidad,0);if(!ti){carrito.style.display='none';flotante.style.display='none';return}carrito.style.display='block';flotante.style.display='flex';cont.textContent=ti;let subtotal=0;items.innerHTML=Estado.carrito.map((item,i)=>{let t=item.precio*item.cantidad;subtotal+=t;return`<div class="ticket-item"><span>${item.cantidad}x ${item.nombre} (${item.variante})</span><span>$${t.toFixed(2)}</span><span class="ticket-item-remove" onclick="ModuloPedido.eliminarItem(${i})">✕</span></div>`}).join('');let cash=ModuloCashback.calcular(subtotal,Estado.carrito);resumen.innerHTML=`💰 Subtotal: $${subtotal.toFixed(2)}${Estado.costoEnvio>0?' | 🚚 Envío: $'+Estado.costoEnvio.toFixed(2):''}`;totalEl.innerHTML=`TOTAL: $${(subtotal+Estado.costoEnvio).toFixed(2)}`;this.mostrarCashback(cash);},
-    mostrarCashback(r){let d=document.getElementById('cashbackDetalle');if(!r.aplica||r.total===0){d.innerHTML='<div class="ticket-cashback-na">No aplica cashback</div>';return}let h='';r.detalle.forEach(x=>{h+=`<div style="display:flex;justify-content:space-between;"><span>🎁 ${x.tipo}</span><span>+$${x.monto.toFixed(2)}</span></div>`});h+=`<div style="text-align:center;font-weight:700;margin-top:6px;border-top:1px dashed #F9A825;padding-top:6px;">🏆 Total: $${r.total.toFixed(2)}</div>`;d.innerHTML=h;},
+    mostrarCashback(r){let d=document.getElementById('cashbackDetalle');console.log('🎁 Mostrando cashback:',r);if(!r.aplica||r.total===0){d.innerHTML='<div class="ticket-cashback-na">No aplica cashback</div>';return}let h='';r.detalle.forEach(x=>{h+=`<div style="display:flex;justify-content:space-between;"><span>🎁 ${x.tipo}</span><span>+$${x.monto.toFixed(2)}</span></div>`});h+=`<div style="text-align:center;font-weight:700;margin-top:6px;border-top:1px dashed #F9A825;padding-top:6px;">🏆 Total: $${r.total.toFixed(2)}</div>`;d.innerHTML=h;},
     eliminarItem(i){Estado.carrito.splice(i,1);this.actualizarTicket();},
     vaciarCarrito(){if(confirm('¿Vaciar?')){Estado.carrito=[];this.actualizarTicket();}},
     irAlCarrito(){document.getElementById('carritoResumen').scrollIntoView({behavior:'smooth'});},
@@ -239,8 +239,7 @@ const ModuloEnvio = {
             m+=`\n\n📍 ${CONFIG.negocio.direccion}\n📞 ${CONFIG.negocio.telefono}`;
             window.open(`https://wa.me/${CONFIG.negocio.whatsapp}?text=${encodeURIComponent(m)}`,'_blank');
             
-            // ⭐⭐⭐ REGISTRAR CLIENTE ⭐⭐⭐
-            console.log('🚀 Registrando cliente...');
+            console.log('🚀 Registrando cliente en Sheets...');
             ModuloClientes.procesarCliente(
                 {whatsapp:Estado.cliente.whatsapp,nombre:Estado.cliente.nombre,direccion:Estado.cliente.direccion||'',zona:Estado.zonaSeleccionada||Estado.cliente.zona||''},
                 sub,cash.total
@@ -252,58 +251,41 @@ const ModuloEnvio = {
 
 // ====== ⭐ MÓDULO 8: REGISTRO DE CLIENTES ⭐ ======
 const ModuloClientes = {
-    _cache:{},
-    _init:false,
-    inicializarCache(){
-        if(this._init)return;
-        this._cache={};
-        if(CONFIG.clientesRegistrados)CONFIG.clientesRegistrados.forEach(c=>{if(c.whatsapp)this._cache[c.whatsapp]=c;});
-        this._init=true;
-        console.log('👤 [CLIENTES] Caché:',Object.keys(this._cache).length,'clientes');
-    },
+    _cache:{},_init:false,
+    inicializarCache(){if(this._init)return;this._cache={};if(CONFIG.clientesRegistrados)CONFIG.clientesRegistrados.forEach(c=>{if(c.whatsapp)this._cache[c.whatsapp]=c;});this._init=true;console.log('👤 Cache:',Object.keys(this._cache).length,'clientes');},
     buscar(w){this.inicializarCache();return this._cache[w]||null;},
     _fmtFecha(f){if(!f||isNaN(f.getTime()))return'';const m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return`${String(f.getDate()).padStart(2,'0')}-${m[f.getMonth()]}-${f.getFullYear()}`;},
     _hoy(){return this._fmtFecha(new Date());},
-    _calcVenc(existente,nuevoSaldo){
-        let hoy=new Date();
-        if(!existente||nuevoSaldo<=0){hoy.setDate(hoy.getDate()+30);return this._fmtFecha(hoy);}
-        if(existente.fechaVencimiento){let p=existente.fechaVencimiento.split('-');if(p.length===3){let meses={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};let d=parseInt(p[0]),me=meses[p[1].toLowerCase()],a=parseInt(p[2]);if(!isNaN(d)&&me!==undefined&&!isNaN(a)){let fv=new Date(a,me,d);fv.setDate(fv.getDate()+4);return this._fmtFecha(fv);}}}
-        hoy.setDate(hoy.getDate()+4);return this._fmtFecha(hoy);
-    },
+    _calcVenc(existente,ns){let hoy=new Date();if(!existente||ns<=0){hoy.setDate(hoy.getDate()+30);return this._fmtFecha(hoy);}if(existente.fechaVencimiento){let p=existente.fechaVencimiento.split('-');if(p.length===3){let meses={ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};let d=parseInt(p[0]),me=meses[p[1].toLowerCase()],a=parseInt(p[2]);if(!isNaN(d)&&me!==undefined&&!isNaN(a)){let fv=new Date(a,me,d);fv.setDate(fv.getDate()+4);return this._fmtFecha(fv);}}}hoy.setDate(hoy.getDate()+4);return this._fmtFecha(hoy);},
     async procesarCliente(datos,monto,cashback){
-        console.log('👤 [CLIENTES] ========== INICIO ==========');
-        console.log('👤 [CLIENTES] Datos:',datos);
-        console.log('👤 [CLIENTES] Monto:',monto,'Cashback:',cashback);
+        console.log('👤 ========== INICIO ==========');
+        console.log('👤 Datos:',datos,'Monto:',monto,'Cashback:',cashback);
         if(!datos||!datos.whatsapp){console.log('❌ Sin WhatsApp');return;}
         this.inicializarCache();
         let w=datos.whatsapp,existente=this.buscar(w),hoy=this._hoy(),fila;
         if(existente){
-            console.log('🔄 EXISTENTE - Saldo anterior:',existente.saldoCashback);
             let ns=(existente.saldoCashback||0)+cashback;
             fila={whatsapp:w,nombre:datos.nombre||existente.nombre,direccion:datos.direccion||existente.direccion||'',zona:datos.zona||existente.zona||'',saldoCashback:ns,fechaVencimiento:this._calcVenc(existente,ns),ultimaCompra:monto||existente.ultimaCompra||0,fechaRegistro:existente.fechaRegistro||hoy,fechaMovimiento:hoy};
             this._cache[w]=fila;
-            console.log('✅ Nuevo saldo:',ns,'Vence:',fila.fechaVencimiento);
         }else{
-            console.log('🆕 NUEVO - Saldo inicial:',cashback);
             let ns=cashback||0;
             fila={whatsapp:w,nombre:datos.nombre||'',direccion:datos.direccion||'',zona:datos.zona||'',saldoCashback:ns,fechaVencimiento:this._calcVenc(null,ns),ultimaCompra:monto||0,fechaRegistro:hoy,fechaMovimiento:hoy};
             this._cache[w]=fila;
-            console.log('✅ Creado - Saldo:',ns,'Vence:',fila.fechaVencimiento);
         }
         try{
-            let filaArray=[fila.whatsapp,fila.nombre,fila.direccion,fila.zona,String(fila.saldoCashback),fila.fechaVencimiento,String(fila.ultimaCompra),fila.fechaRegistro,fila.fechaMovimiento];
+            let fa=[fila.whatsapp,fila.nombre,fila.direccion,fila.zona,String(fila.saldoCashback),fila.fechaVencimiento,String(fila.ultimaCompra),fila.fechaRegistro,fila.fechaMovimiento];
             if(existente){
                 let resp=await gapi.client.sheets.spreadsheets.values.get({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I'});
                 let filas=resp.result.values||[],idx=-1;
                 for(let i=1;i<filas.length;i++){if(filas[i]&&filas[i][0]===w){idx=i+1;break;}}
-                if(idx===-1){await gapi.client.sheets.spreadsheets.values.append({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I',valueInputOption:'USER_ENTERED',insertDataOption:'INSERT_ROWS',resource:{values:[filaArray]}});console.log('📤 Agregado como nuevo');}
-                else{await gapi.client.sheets.spreadsheets.values.update({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:`Clientes!A${idx}:I${idx}`,valueInputOption:'USER_ENTERED',resource:{values:[filaArray]}});console.log('✏️ Actualizado fila',idx);}
+                if(idx===-1){await gapi.client.sheets.spreadsheets.values.append({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I',valueInputOption:'USER_ENTERED',insertDataOption:'INSERT_ROWS',resource:{values:[fa]}});console.log('📤 Agregado nuevo');}
+                else{await gapi.client.sheets.spreadsheets.values.update({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:`Clientes!A${idx}:I${idx}`,valueInputOption:'USER_ENTERED',resource:{values:[fa]}});console.log('✏️ Actualizado fila',idx);}
             }else{
-                await gapi.client.sheets.spreadsheets.values.append({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I',valueInputOption:'USER_ENTERED',insertDataOption:'INSERT_ROWS',resource:{values:[filaArray]}});
+                await gapi.client.sheets.spreadsheets.values.append({spreadsheetId:SHEETS_CONFIG.spreadsheetId,range:'Clientes!A:I',valueInputOption:'USER_ENTERED',insertDataOption:'INSERT_ROWS',resource:{values:[fa]}});
                 console.log('📤 Nuevo cliente agregado');
             }
-            console.log('👤 [CLIENTES] ========== GUARDADO ==========');
-        }catch(e){console.error('❌ Error Sheets:',e);}
+            console.log('👤 ========== GUARDADO ==========');
+        }catch(e){console.error('❌ Error:',e);}
     }
 };
 
